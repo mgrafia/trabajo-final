@@ -38,6 +38,11 @@ Detalle ítem por ítem de las compras de supermercado (cuando hay ticket/factur
 
 Solo para recordatorio de cuándo vence cada resumen de tarjeta y cuánto es, aproximado. **No se suma al total de gastos** — las compras hechas con esas tarjetas ya están contadas una por una en `Gastos`; sumar el resumen acá también duplicaría el total.
 
+### Tabla `Cartera`
+| Ticker/ON | Tipo (Acción/ON/Bono/CEDEAR/Otro) | Mercado (IBKR/Bullmarket) | Cantidad | Precio promedio de compra | Moneda (ARS/USD) | Fecha de carga | Notas |
+
+Posiciones de inversión, cargadas a mano (screenshot del usuario o carga directa en el artefacto) — no hay cotización en vivo guardada acá, se busca al momento cuando el usuario pregunta cuánto vale la cartera hoy. **Importante:** aunque el conector de IBKR está vinculado a la cuenta del usuario, **nunca hay que llamarlo para traer posiciones automáticamente** — el usuario lo pidió explícitamente ("no quiero que te conectes a IBKR, usa la información que te pase"). Siempre pedirle que pase captura o texto con las posiciones.
+
 ## Rubros
 
 **Gastos Fijos:** Alquiler, Expensas, Luz, Gas, Agua, Internet, Psicóloga, Limpieza, Universidad, Obra social, Suscripciones, Fijo Extra (Disponible) 1 a 10.
@@ -88,6 +93,7 @@ Se ve tanto desde la web de Airtable como desde su app mobile.
   1. Evolución mensual (últimos 6 meses): por mes, una barra apilada de gasto (Fijo + Variable) y al lado una barra de Ingresos, para comparar de un vistazo.
   2. "Distribución del gasto por rubro" (del mes que se esté mirando en Gastos del mes): donut con el detalle de los principales rubros al lado (nombre, monto, % del total) — incluye TODOS los rubros con gasto ese mes, tengan presupuesto cargado o no.
   3. "Cumplimiento de presupuesto" (mismo mes): barras por rubro con % del presupuesto usado, ordenadas de mayor a menor, línea de referencia en 100% y en rojo lo que se pasó. Solo incluye rubros con presupuesto cargado (si no, el % no significa nada) — el resto queda listado aparte como nota.
+- **Cartera**: posiciones de inversión agrupadas por mercado (IBKR / Bullmarket), con cantidad y precio promedio de compra editables inline. Permite agregar/borrar posiciones. Sin cotización en vivo — eso se pide en el chat.
 
 Los gráficos 1 y 3 (los más densos, con varias etiquetas) mantienen tamaño de letra legible y scrollean horizontal en su propia tarjeta en vez de achicarse hasta ilegibles en el celular; el donut (chico y de tamaño fijo) no lo necesita.
 
@@ -116,5 +122,5 @@ Administrable desde [claude.ai/code/routines](https://claude.ai/code/routines). 
 - [x] Gráficos de evolución mensual y gasto por rubro (pestaña Gráficos del artefacto).
 - [x] Vencimientos de gastos fijos y tarjetas de crédito (pestaña Vencimientos del artefacto).
 - [~] Recordatorio automático (push al celular) de vencimientos próximos — lógica lista y probada, pero pausada porque el push no llega al celular (ver "Recordatorios automáticos").
-- [ ] Cartera de inversiones (acciones, ONs, bonos) cargada manualmente, con cotización actualizada al consultar.
+- [x] Cartera de inversiones (acciones, ONs, bonos) cargada manualmente (pestaña Cartera del artefacto), con cotización a buscar al consultar (no en vivo).
 - [ ] Proyección de ingresos futuros combinando sueldo + cartera.

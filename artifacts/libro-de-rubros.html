@@ -183,11 +183,11 @@
   .add-toggle:hover{border-color:var(--focus); color:var(--ink);}
   .add-fields{display:none; flex-direction:column; gap:8px; margin-top:8px;}
   .add-fields.show{display:flex;}
-  .add-fields input{
+  .add-fields input, .add-fields select{
     border:1px solid var(--line-strong); background:var(--paper); color:var(--ink);
     border-radius:6px; padding:7px 9px; font:inherit; font-size:13px;
   }
-  .add-fields input:focus{outline:none; border-color:var(--focus);}
+  .add-fields input:focus, .add-fields select:focus{outline:none; border-color:var(--focus);}
   .add-fields .actions{display:flex; gap:8px;}
   .add-fields button{
     font:inherit; font-size:12.5px; border-radius:6px; padding:7px 12px; cursor:pointer; border:1px solid transparent;
@@ -342,6 +342,17 @@
     color:inherit; font:inherit; font-family:'IBM Plex Mono', monospace; font-size:12px; border-radius:6px; padding:3px 6px;
   }
   .due-amount-input:focus{outline:none; border-color:var(--focus);}
+
+  /* ---------- cartera tab ---------- */
+  li.pos-row .pos-tipo{
+    flex:none; font-size:10px; padding:3px 8px; border-radius:20px; white-space:nowrap;
+    background:var(--paper-sunken); color:var(--ink-soft);
+  }
+  li.pos-row .due-main{flex:1;}
+  li.pos-row .due-sub{max-width:32ch; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
+  li.pos-row .pos-moneda{
+    flex:none; font-size:10px; color:var(--ink-faint); font-family:'IBM Plex Mono', monospace; width:3ch;
+  }
   .due-section-title{
     font-family:'Spectral', serif; font-weight:600; font-size:14px; margin:0 0 8px; color:var(--ink-soft);
   }
@@ -402,6 +413,7 @@
     <button type="button" data-tabbtn="consumo">Consumo</button>
     <button type="button" data-tabbtn="vencimientos">Vencimientos</button>
     <button type="button" data-tabbtn="graficos">Gráficos</button>
+    <button type="button" data-tabbtn="cartera">Cartera</button>
   </nav>
 
   <div class="banner" id="banner">
@@ -663,6 +675,53 @@
       </div>
     </section>
 
+    <!-- ===================== CARTERA TAB ===================== -->
+    <section class="tabpanel" data-tabpanel="cartera">
+      <h2 class="due-section-title">IBKR</h2>
+      <ul class="due-list" id="carteraIbkrList">
+        <li class="due-row"><span class="due-main">Cargando…</span></li>
+      </ul>
+
+      <h2 class="due-section-title">Bullmarket</h2>
+      <ul class="due-list" id="carteraBullList">
+        <li class="due-row"><span class="due-main">Cargando…</span></li>
+      </ul>
+
+      <form class="add-row standalone-add" data-addposicion>
+        <button type="button" class="add-toggle" data-addtoggle>+ agregar posición</button>
+        <div class="add-fields" data-addfields>
+          <input type="text" placeholder="Ticker/ON (ej. AAPL, AE38)" data-addticker maxlength="20">
+          <select class="sel-input" data-addtipo>
+            <option value="Acción">Acción</option>
+            <option value="CEDEAR">CEDEAR</option>
+            <option value="ON">ON</option>
+            <option value="Bono">Bono</option>
+            <option value="Otro">Otro</option>
+          </select>
+          <select class="sel-input" data-addmercado>
+            <option value="IBKR">IBKR</option>
+            <option value="Bullmarket">Bullmarket</option>
+          </select>
+          <select class="sel-input" data-addmoneda>
+            <option value="USD">USD</option>
+            <option value="ARS">ARS</option>
+          </select>
+          <input type="text" inputmode="decimal" placeholder="Cantidad" data-addcantidad>
+          <input type="text" inputmode="decimal" placeholder="Precio promedio de compra" data-addprecio>
+          <input type="text" placeholder="Notas (opcional)" data-addnotas maxlength="120">
+          <div class="actions">
+            <button type="submit" class="btn-primary" data-addsubmit>Guardar</button>
+            <button type="button" class="btn-ghost" data-addcancel>Cancelar</button>
+          </div>
+          <span class="add-error" data-adderror></span>
+        </div>
+      </form>
+
+      <footer class="note">
+        <strong>Cómo funciona:</strong> cargá tus posiciones a mano (mandame una captura de IBKR o Bullmarket y las paso yo) o editá cantidad y precio promedio acá mismo. No muestra cotización en vivo — para eso pedímelo en el chat y te la busco al momento.
+      </footer>
+    </section>
+
   </div>
 </div>
 
@@ -681,6 +740,16 @@
   var TJ_DIA = "fldAYdfZGfJVr1h25";
   var TJ_MONTO = "fldJOgNAluZaHtw2Z";
   var TJ_USD = "fldXa4GLRcynBBzov";
+
+  var CART_TABLE = "tbl2LTQe5PsG8lRnv";
+  var CT_TICKER = "fldBlm22NDloa8qIT";
+  var CT_TIPO = "fldAPkTNGTeJvCzYg";
+  var CT_MERCADO = "fldp1ImkyQcPjoKGu";
+  var CT_CANTIDAD = "fldD4ci8y6lyMsBBs";
+  var CT_PPC = "fld3rKyfHvnBCse4s";
+  var CT_MONEDA = "fldTqBh3KsO1j0PFu";
+  var CT_FECHA = "fldPIrrIq3V987CY1";
+  var CT_NOTAS = "fldIogJd5biDj2e24";
 
   var GASTOS_TABLE = "YOUR_GASTOS_TABLE_ID";
   var G_FECHA = "fldIPMR9hqPtleZbx";
@@ -784,10 +853,10 @@
     });
   }
 
-  var connectedTables = {presupuesto:false, gastos:false, ingresos:false, items:false, tarjetas:false};
+  var connectedTables = {presupuesto:false, gastos:false, ingresos:false, items:false, tarjetas:false, cartera:false};
   function anyConnected(){
     return connectedTables.presupuesto || connectedTables.gastos || connectedTables.ingresos ||
-      connectedTables.items || connectedTables.tarjetas;
+      connectedTables.items || connectedTables.tarjetas || connectedTables.cartera;
   }
 
   /* ================= PRESUPUESTO TAB (rubro editor) ================= */
@@ -1403,6 +1472,170 @@
     });
   }
 
+  /* ================= CARTERA TAB ================= */
+  var carteraById = {}; // id -> {ticker, tipo, mercado, cantidad, ppc, moneda, notas}
+  var carteraIbkrList = document.getElementById("carteraIbkrList");
+  var carteraBullList = document.getElementById("carteraBullList");
+
+  function buildPosRow(item){
+    var li = document.createElement("li");
+    li.className = "due-row pos-row";
+    var monedaSym = item.moneda === "USD" ? "US$" : "$";
+    li.innerHTML =
+      '<span class="pos-tipo">' + escapeHtml(item.tipo || "") + '</span>' +
+      '<div class="due-main"><span class="due-name" title="' + escapeHtml(item.ticker) + '">' + escapeHtml(item.ticker) + '</span>' +
+        (item.notas ? '<div class="due-sub" title="' + escapeHtml(item.notas) + '">' + escapeHtml(item.notas) + '</div>' : '') + '</div>' +
+      '<div class="due-amounts">' +
+        '<div class="due-amount-field"><span class="peso">cant.</span><input class="due-amount-input" type="text" inputmode="decimal" value="' + (item.cantidad || item.cantidad === 0 ? formatARS(item.cantidad) : "") + '" data-cantidadinput></div>' +
+        '<div class="due-amount-field"><span class="peso">' + monedaSym + '</span><input class="due-amount-input" type="text" inputmode="decimal" value="' + (item.ppc ? formatARS(item.ppc) : "") + '" placeholder="PPC" data-ppcinput></div>' +
+      '</div>' +
+      '<button type="button" class="del" data-del title="Borrar" style="opacity:1;">✕</button>';
+
+    var cantidadInput = li.querySelector("[data-cantidadinput]");
+    var ppcInput = li.querySelector("[data-ppcinput]");
+    cantidadInput.addEventListener("blur", function(){
+      var v = parseARSInput(cantidadInput.value);
+      cantidadInput.value = formatARS(v);
+      if (v === item.cantidad) return;
+      carteraById[item.id].cantidad = v;
+      callAirtable("update_records_for_table", {
+        baseId: BASE_ID, tableId: CART_TABLE,
+        records: [{id: item.id, fields: (function(){ var f={}; f[CT_CANTIDAD]=v; return f; })()}]
+      }).then(function(){ mcpPromise.then(function(mcp){ if (mcp) mcp.invalidate("Airtable", "list_records_for_table"); }); });
+    });
+    cantidadInput.addEventListener("keydown", function(e){ if (e.key === "Enter") cantidadInput.blur(); });
+    ppcInput.addEventListener("blur", function(){
+      var v = parseARSInput(ppcInput.value);
+      ppcInput.value = v ? formatARS(v) : "";
+      if (v === item.ppc) return;
+      carteraById[item.id].ppc = v;
+      callAirtable("update_records_for_table", {
+        baseId: BASE_ID, tableId: CART_TABLE,
+        records: [{id: item.id, fields: (function(){ var f={}; f[CT_PPC]=v; return f; })()}]
+      }).then(function(){ mcpPromise.then(function(mcp){ if (mcp) mcp.invalidate("Airtable", "list_records_for_table"); }); });
+    });
+    ppcInput.addEventListener("keydown", function(e){ if (e.key === "Enter") ppcInput.blur(); });
+
+    var delBtn = li.querySelector("[data-del]");
+    delBtn.addEventListener("click", function(){
+      if (!li.classList.contains("confirming")){
+        li.classList.add("confirming");
+        delBtn.textContent = "confirmar";
+        return;
+      }
+      callAirtable("delete_records_for_table", {baseId: BASE_ID, tableId: CART_TABLE, recordIds: [item.id]})
+        .then(function(){
+          delete carteraById[item.id];
+          renderCartera();
+          mcpPromise.then(function(mcp){ if (mcp) mcp.invalidate("Airtable", "list_records_for_table"); });
+        });
+    });
+    return li;
+  }
+
+  function renderCartera(){
+    var all = Object.keys(carteraById).map(function(id){ return Object.assign({id:id}, carteraById[id]); })
+      .sort(function(a,b){ return a.ticker.localeCompare(b.ticker, 'es'); });
+    var ibkr = all.filter(function(p){ return p.mercado === "IBKR"; });
+    var bull = all.filter(function(p){ return p.mercado === "Bullmarket"; });
+
+    carteraIbkrList.innerHTML = "";
+    if (ibkr.length === 0){
+      carteraIbkrList.innerHTML = '<li class="due-row"><span class="due-main" style="color:var(--ink-faint);font-style:italic;">Sin posiciones cargadas</span></li>';
+    } else {
+      ibkr.forEach(function(p){ carteraIbkrList.appendChild(buildPosRow(p)); });
+    }
+
+    carteraBullList.innerHTML = "";
+    if (bull.length === 0){
+      carteraBullList.innerHTML = '<li class="due-row"><span class="due-main" style="color:var(--ink-faint);font-style:italic;">Sin posiciones cargadas</span></li>';
+    } else {
+      bull.forEach(function(p){ carteraBullList.appendChild(buildPosRow(p)); });
+    }
+  }
+
+  var posForm = document.querySelector("[data-addposicion]");
+  if (posForm){
+    var posToggle = posForm.querySelector("[data-addtoggle]");
+    var posFields = posForm.querySelector("[data-addfields]");
+    var posTicker = posForm.querySelector("[data-addticker]");
+    var posTipo = posForm.querySelector("[data-addtipo]");
+    var posMercado = posForm.querySelector("[data-addmercado]");
+    var posMoneda = posForm.querySelector("[data-addmoneda]");
+    var posCantidad = posForm.querySelector("[data-addcantidad]");
+    var posPrecio = posForm.querySelector("[data-addprecio]");
+    var posNotas = posForm.querySelector("[data-addnotas]");
+    var posSubmit = posForm.querySelector("[data-addsubmit]");
+    var posCancel = posForm.querySelector("[data-addcancel]");
+    var posError = posForm.querySelector("[data-adderror]");
+
+    posToggle.addEventListener("click", function(){
+      posFields.classList.add("show"); posToggle.style.display = "none"; posTicker.focus();
+    });
+    function resetPosForm(){
+      posTicker.value = ""; posCantidad.value = ""; posPrecio.value = ""; posNotas.value = "";
+      posFields.classList.remove("show"); posToggle.style.display = ""; posError.classList.remove("show");
+    }
+    posCancel.addEventListener("click", resetPosForm);
+
+    posForm.addEventListener("submit", function(e){
+      e.preventDefault();
+      var ticker = posTicker.value.trim().toUpperCase();
+      if (!ticker){
+        posError.textContent = "Poné un ticker o nombre de la posición.";
+        posError.classList.add("show");
+        return;
+      }
+      var cantidad = parseARSInput(posCantidad.value || "0");
+      var precio = posPrecio.value ? parseARSInput(posPrecio.value) : 0;
+      var tipo = posTipo.value, mercado = posMercado.value, moneda = posMoneda.value;
+      var notas = posNotas.value.trim();
+      posSubmit.disabled = true;
+      posError.classList.remove("show");
+
+      var f = {};
+      f[CT_TICKER] = ticker; f[CT_TIPO] = tipo; f[CT_MERCADO] = mercado; f[CT_MONEDA] = moneda;
+      f[CT_CANTIDAD] = cantidad;
+      if (precio) f[CT_PPC] = precio;
+      f[CT_FECHA] = new Date().toISOString().slice(0,10);
+      if (notas) f[CT_NOTAS] = notas;
+
+      callAirtable("create_records_for_table", { baseId: BASE_ID, tableId: CART_TABLE, records: [{fields: f}] })
+        .then(function(res){
+          posSubmit.disabled = false;
+          var rec = res && res.payload && res.payload.records && res.payload.records[0];
+          if (rec){
+            carteraById[rec.id] = {ticker: ticker, tipo: tipo, mercado: mercado, cantidad: cantidad, ppc: precio, moneda: moneda, notas: notas};
+            renderCartera();
+          }
+          resetPosForm();
+          mcpPromise.then(function(mcp){ if (mcp) mcp.invalidate("Airtable", "list_records_for_table"); });
+        }).catch(function(err){
+          posSubmit.disabled = false;
+          posError.textContent = "No se pudo guardar (" + (err && err.code || "error") + "). Probá de nuevo.";
+          posError.classList.add("show");
+        });
+    });
+  }
+
+  function applyCarteraPayload(payload){
+    if (!payload || !payload.records) return;
+    carteraById = {};
+    payload.records.forEach(function(rec){
+      var f = rec.cellValuesByFieldId || {};
+      carteraById[rec.id] = {
+        ticker: f[CT_TICKER] || "(sin nombre)",
+        tipo: selectName(f[CT_TIPO]),
+        mercado: selectName(f[CT_MERCADO]),
+        cantidad: typeof f[CT_CANTIDAD] === "number" ? f[CT_CANTIDAD] : 0,
+        ppc: typeof f[CT_PPC] === "number" ? f[CT_PPC] : 0,
+        moneda: selectName(f[CT_MONEDA]),
+        notas: f[CT_NOTAS] || ""
+      };
+    });
+    renderCartera();
+  }
+
   /* ================= GRAFICOS TAB ================= */
   var SVGNS = "http://www.w3.org/2000/svg";
   function svgEl(tag, attrs){
@@ -1763,6 +1996,7 @@
     watchTable("ingresos", ING_TABLE, applyIngresosPayload)(mcp);
     watchTable("items", ITEMS_TABLE, applyItemsPayload)(mcp);
     watchTable("tarjetas", TARJ_TABLE, applyTarjetasPayload)(mcp);
+    watchTable("cartera", CART_TABLE, applyCarteraPayload)(mcp);
   }).catch(function(){
     setStatus("err", "Sin conector");
     showEmptyState(true);
@@ -1771,5 +2005,6 @@
   renderGastosTab();
   renderConsumoTab();
   renderVencimientos();
+  renderCartera();
 })();
 </script>
