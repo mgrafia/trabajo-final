@@ -85,9 +85,11 @@ Se ve tanto desde la web de Airtable como desde su app mobile.
 - **Consumo**: análisis histórico de `Items Supermercado` — gasto por categoría, y productos separados en recurrentes (aparecen en 2+ compras, con precio promedio) vs. puntuales, para anticipar la próxima compra y detectar qué conviene comprar por mayor.
 - **Vencimientos**: gastos fijos y tarjetas ordenados por proximidad ("vence en 3 días"), con el día editable ahí mismo. Permite agregar/editar/borrar tarjetas.
 - **Gráficos**: tres gráficos —
-  1. Evolución mensual (últimos 6 meses): barras apiladas de gasto Fijo vs. Variable, más una línea de Ingresos superpuesta para ver de un vistazo si algún mes se gastó más de lo que entró.
+  1. Evolución mensual (últimos 6 meses): por mes, una barra apilada de gasto (Fijo + Variable) y al lado una barra de Ingresos, para comparar de un vistazo.
   2. "Distribución del gasto por rubro" (del mes que se esté mirando en Gastos del mes): donut con el detalle de los principales rubros al lado (nombre, monto, % del total) — incluye TODOS los rubros con gasto ese mes, tengan presupuesto cargado o no.
   3. "Cumplimiento de presupuesto" (mismo mes): barras por rubro con % del presupuesto usado, ordenadas de mayor a menor, línea de referencia en 100% y en rojo lo que se pasó. Solo incluye rubros con presupuesto cargado (si no, el % no significa nada) — el resto queda listado aparte como nota.
+
+Los gráficos 1 y 3 (los más densos, con varias etiquetas) mantienen tamaño de letra legible y scrollean horizontal en su propia tarjeta en vez de achicarse hasta ilegibles en el celular; el donut (chico y de tamaño fijo) no lo necesita.
 
 Un rubro agregado en la pestaña Presupuesto queda como línea de presupuesto; para que también aparezca como opción en el campo Rubro de `Gastos` (es un singleSelect de opciones fijas) hay que decírselo a Claude la primera vez que se cargue un gasto real de esa categoría.
 

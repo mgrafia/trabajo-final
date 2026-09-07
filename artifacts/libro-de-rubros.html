@@ -349,8 +349,12 @@
   }
   .chart-card h2{font-family:'Spectral', serif; font-weight:600; font-size:15px; margin:0 0 12px;}
   .chart-card svg{display:block; max-width:100%;}
-  .chart-axis{fill:var(--ink-faint); font-family:'IBM Plex Mono', monospace; font-size:10px;}
-  .chart-value{fill:var(--ink); font-family:'IBM Plex Mono', monospace; font-size:10px; font-weight:500;}
+  .chart-axis{fill:var(--ink-faint); font-family:'IBM Plex Mono', monospace; font-size:13px;}
+  .chart-value{fill:var(--ink); font-family:'IBM Plex Mono', monospace; font-size:13px; font-weight:500;}
+  /* Evolución y Cumplimiento tienen muchas etiquetas: mantienen tamaño legible y scrollean
+     horizontal en vez de achicarse hasta ilegibles en el celular. El donut es chico y fijo,
+     no necesita esto. */
+  #chartEvolucion, #chartRubro{min-width:600px; max-width:none;}
   .chart-legend{list-style:none; margin:12px 0 0; padding:0; display:flex; flex-wrap:wrap; gap:10px 18px;}
   .chart-legend li{display:flex; align-items:center; gap:6px; font-size:12px; color:var(--ink-soft);}
   .chart-legend .swatch{width:9px; height:9px; border-radius:2px; flex:none;}
@@ -1397,43 +1401,40 @@
     var maxTotal = Math.max.apply(null, data.map(function(d){ return Math.max(d.total, d.ingreso); }).concat([1]));
     var n = data.length;
     var slot = chartW / n;
-    var barW = Math.min(46, slot * 0.55);
+    var pairW = Math.min(56, slot * 0.7);
+    var barW = pairW / 2 - 2;
     var yBase = padT + chartH;
-    function yFor(v){ return yBase - (maxTotal > 0 ? (v / maxTotal) * chartH : 0); }
+    function hFor(v){ return maxTotal > 0 ? (v / maxTotal) * chartH : 0; }
 
     data.forEach(function(d, i){
       var cx = padL + slot * i + slot / 2;
-      var hFijo = maxTotal > 0 ? (d.fijo / maxTotal) * chartH : 0;
-      var hVar = maxTotal > 0 ? (d.variable / maxTotal) * chartH : 0;
+      var xGasto = cx - pairW / 2;
+      var xIngreso = cx + pairW / 2 - barW;
+
+      var hVar = hFor(d.variable), hFijo = hFor(d.fijo);
       if (d.variable > 0){
-        svg.appendChild(svgEl("rect", {x: cx - barW/2, y: yBase - hVar, width: barW, height: Math.max(hVar,0), fill: "var(--variable)", rx:2}));
+        svg.appendChild(svgEl("rect", {x: xGasto, y: yBase - hVar, width: barW, height: Math.max(hVar,0), fill: "var(--variable)", rx:2}));
       }
       if (d.fijo > 0){
-        svg.appendChild(svgEl("rect", {x: cx - barW/2, y: yBase - hVar - hFijo, width: barW, height: Math.max(hFijo,0), fill: "var(--fijo)", rx:2}));
+        svg.appendChild(svgEl("rect", {x: xGasto, y: yBase - hVar - hFijo, width: barW, height: Math.max(hFijo,0), fill: "var(--fijo)", rx:2}));
       }
       if (d.total > 0){
-        var t = svgEl("text", {x: cx, y: yBase - hVar - hFijo - 6, "text-anchor":"middle", class:"chart-value"});
+        var t = svgEl("text", {x: xGasto + barW/2, y: yBase - hVar - hFijo - 6, "text-anchor":"middle", class:"chart-value"});
         t.textContent = d.total >= 1000 ? (d.total/1000).toFixed(0) + "k" : "$" + formatARS(d.total);
         svg.appendChild(t);
       }
-      var lbl = svgEl("text", {x: cx, y: H - 8, "text-anchor":"middle", class:"chart-axis"});
-      lbl.textContent = d.label;
-      svg.appendChild(lbl);
-    });
 
-    var pts = data.map(function(d, i){ return (padL + slot * i + slot / 2) + "," + yFor(d.ingreso); }).join(" ");
-    svg.appendChild(svgEl("polyline", {
-      points: pts, fill: "none", stroke: "var(--ingreso)", "stroke-width": 2,
-      "stroke-linejoin":"round", "stroke-linecap":"round"
-    }));
-    data.forEach(function(d, i){
-      var cx = padL + slot * i + slot / 2, cy = yFor(d.ingreso);
-      svg.appendChild(svgEl("circle", {cx: cx, cy: cy, r: 3.5, fill: "var(--ingreso)"}));
+      var hIng = hFor(d.ingreso);
       if (d.ingreso > 0){
-        var t2 = svgEl("text", {x: cx, y: cy - 8, "text-anchor":"middle", class:"chart-value", style:"fill:var(--ingreso);"});
+        svg.appendChild(svgEl("rect", {x: xIngreso, y: yBase - hIng, width: barW, height: hIng, fill: "var(--ingreso)", rx:2}));
+        var t2 = svgEl("text", {x: xIngreso + barW/2, y: yBase - hIng - 6, "text-anchor":"middle", class:"chart-value", style:"fill:var(--ingreso);"});
         t2.textContent = d.ingreso >= 1000 ? (d.ingreso/1000).toFixed(0) + "k" : "$" + formatARS(d.ingreso);
         svg.appendChild(t2);
       }
+
+      var lbl = svgEl("text", {x: cx, y: H - 8, "text-anchor":"middle", class:"chart-axis"});
+      lbl.textContent = d.label;
+      svg.appendChild(lbl);
     });
   }
 
