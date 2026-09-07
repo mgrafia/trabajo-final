@@ -71,6 +71,10 @@ Interface de Airtable **"Dashboard Finanzas"** → página **"Resumen Mensual"**
 
 Se ve tanto desde la web de Airtable como desde su app mobile.
 
+## Artefactos
+
+**Libro de Rubros** (`artifacts/libro-de-rubros.html`) — panel para gestionar la tabla `Presupuesto`: ver los rubros de Ingresos/Fijos/Variables agrupados con su monto esperado, editarlo inline, borrar un rubro, o agregar uno nuevo (ej. "Monotributo" como gasto fijo). Se conecta en vivo a Airtable desde el navegador vía la capability `mcp` de Claude (usa el conector "Airtable" del usuario, sin exponer ningún token). Un rubro agregado ahí queda como línea de presupuesto; para que también aparezca como opción en el campo Rubro de `Gastos` (es un singleSelect de opciones fijas) hay que decírselo a Claude la primera vez que se cargue un gasto real de esa categoría.
+
 ## Incidentes conocidos
 
 - **Duplicación de registros**: si en el chat del celular la respuesta de Claude se queda "iterando" mucho tiempo después de confirmar una carga, puede ser que la carga ya se haya hecho y el reintento (reenviar "Sí" o un mensaje de más) genere un registro duplicado. Ya pasó una vez con una compra de supermercado (gasto + 9 items duplicados) y se corrigió a mano. Recomendación: esperar y revisar Airtable antes de reenviar la confirmación.
@@ -80,6 +84,7 @@ Se ve tanto desde la web de Airtable como desde su app mobile.
 - [x] Registro de gastos e ingresos (texto, foto de ticket, y link de factura QR).
 - [x] Base de Airtable con Gastos, Ingresos, Presupuesto e Items Supermercado.
 - [x] Dashboard mensual (gastos del mes, ingresos del mes, presupuesto editable).
+- [x] Artefacto "Libro de Rubros" para gestionar categorías y presupuesto en vivo.
 - [ ] Definir cómo catalogar pagos por transferencia en Medio de pago.
 - [ ] Análisis de consumo recurrente vs. puntual (Items Supermercado) para optimizar compras.
 - [ ] Cartera de inversiones (acciones, ONs, bonos) cargada manualmente, con cotización actualizada al consultar.

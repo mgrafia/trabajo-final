@@ -1,0 +1,629 @@
+<title>Libro de Rubros</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Spectral:wght@500;600&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+  :root{
+    --paper:#EFF1EA; --paper-raised:#F8F9F4; --paper-sunken:#E5E8DF;
+    --ink:#1B211D; --ink-soft:#576057; --ink-faint:#8B9389;
+    --line:rgba(27,33,29,0.13); --line-strong:rgba(27,33,29,0.24);
+    --fijo:#1F5C4E; --fijo-soft:#DCEAE5;
+    --variable:#8B5E1F; --variable-soft:#F0E4D2;
+    --ingreso:#2A5C8A; --ingreso-soft:#DDE7EF;
+    --danger:#B23A2E; --danger-soft:#F5DEDA;
+    --focus:#2A5C8A;
+    --shadow: 0 1px 2px rgba(27,33,29,0.06), 0 6px 16px -8px rgba(27,33,29,0.18);
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --paper:#141813; --paper-raised:#1B211B; --paper-sunken:#0F130E;
+      --ink:#ECEFE7; --ink-soft:#AAB3A4; --ink-faint:#717A6D;
+      --line:rgba(236,239,231,0.14); --line-strong:rgba(236,239,231,0.26);
+      --fijo:#5CBBA0; --fijo-soft:#1D332B;
+      --variable:#D8A855; --variable-soft:#3A2E16;
+      --ingreso:#7FB0DC; --ingreso-soft:#1D2A35;
+      --danger:#E37E6E; --danger-soft:#3A211C;
+      --focus:#7FB0DC;
+      --shadow: 0 1px 2px rgba(0,0,0,0.3), 0 8px 20px -8px rgba(0,0,0,0.5);
+    }
+  }
+  :root[data-theme="dark"]{
+    --paper:#141813; --paper-raised:#1B211B; --paper-sunken:#0F130E;
+    --ink:#ECEFE7; --ink-soft:#AAB3A4; --ink-faint:#717A6D;
+    --line:rgba(236,239,231,0.14); --line-strong:rgba(236,239,231,0.26);
+    --fijo:#5CBBA0; --fijo-soft:#1D332B;
+    --variable:#D8A855; --variable-soft:#3A2E16;
+    --ingreso:#7FB0DC; --ingreso-soft:#1D2A35;
+    --danger:#E37E6E; --danger-soft:#3A211C;
+    --focus:#7FB0DC;
+    --shadow: 0 1px 2px rgba(0,0,0,0.3), 0 8px 20px -8px rgba(0,0,0,0.5);
+  }
+
+  *{box-sizing:border-box;}
+  body{
+    margin:0; background:var(--paper); color:var(--ink);
+    font-family:'IBM Plex Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;
+    font-size:14px; line-height:1.45;
+  }
+  .wrap{max-width:1080px; margin:0 auto; padding:28px 20px 64px;}
+
+  header.top{
+    display:flex; align-items:flex-end; justify-content:space-between; gap:16px;
+    flex-wrap:wrap; margin-bottom:22px; padding-bottom:18px; border-bottom:1px solid var(--line-strong);
+  }
+  .titleblock h1{
+    font-family:'Spectral', Georgia, 'Times New Roman', serif;
+    font-weight:600; font-size:28px; margin:0 0 4px; letter-spacing:-0.01em;
+  }
+  .titleblock p{margin:0; color:var(--ink-soft); font-size:13px;}
+  .status{
+    display:flex; align-items:center; gap:8px; font-size:12px; color:var(--ink-soft);
+    font-family:'IBM Plex Mono', 'SFMono-Regular', Consolas, monospace;
+  }
+  .dot{width:7px; height:7px; border-radius:50%; background:var(--ink-faint); flex:none;}
+  .dot.ok{background:var(--fijo);}
+  .dot.warn{background:var(--variable);}
+  .dot.err{background:var(--danger);}
+
+  .banner{
+    display:none; align-items:center; gap:10px; padding:12px 14px; border-radius:8px;
+    background:var(--danger-soft); color:var(--danger); font-size:13px; margin-bottom:18px;
+    border:1px solid color-mix(in srgb, var(--danger) 35%, transparent);
+  }
+  .banner.show{display:flex;}
+  .banner button{
+    margin-left:auto; border:1px solid currentColor; background:transparent; color:inherit;
+    border-radius:6px; padding:5px 10px; font:inherit; font-size:12px; cursor:pointer;
+  }
+
+  .empty-state{
+    display:none; flex-direction:column; align-items:center; text-align:center; gap:8px;
+    padding:56px 20px; color:var(--ink-soft);
+  }
+  .empty-state.show{display:flex;}
+  .empty-state h2{font-family:'Spectral', serif; font-size:19px; color:var(--ink); margin:0;}
+  .empty-state p{max-width:36ch; margin:0; font-size:13px;}
+  .empty-state code{
+    background:var(--paper-sunken); padding:1px 6px; border-radius:4px;
+    font-family:'IBM Plex Mono', monospace; font-size:12px;
+  }
+
+  main.board{display:grid; grid-template-columns:repeat(3, 1fr); gap:18px;}
+  @media (max-width:820px){ main.board{grid-template-columns:1fr;} }
+
+  section.col{
+    background:var(--paper-raised); border:1px solid var(--line); border-radius:12px;
+    box-shadow:var(--shadow); overflow:hidden; display:flex; flex-direction:column;
+  }
+  .col-head{
+    padding:14px 16px 12px; border-bottom:1px solid var(--line);
+    display:flex; align-items:center; justify-content:space-between; gap:10px;
+  }
+  .col-head .bar{width:4px; height:22px; border-radius:2px; flex:none;}
+  .col-fijo .bar{background:var(--fijo);}
+  .col-variable .bar{background:var(--variable);}
+  .col-ingreso .bar{background:var(--ingreso);}
+  .col-head h2{
+    font-family:'Spectral', serif; font-weight:600; font-size:16px; margin:0;
+    flex:1; display:flex; align-items:center; gap:8px;
+  }
+  .col-head .total{
+    font-family:'IBM Plex Mono', monospace; font-size:13px; font-weight:500; color:var(--ink-soft);
+    font-variant-numeric:tabular-nums;
+  }
+  .col-fijo .total{color:var(--fijo);}
+  .col-variable .total{color:var(--variable);}
+  .col-ingreso .total{color:var(--ingreso);}
+
+  ul.rows{list-style:none; margin:0; padding:4px 0; flex:1; min-height:40px;}
+  li.row{
+    display:flex; align-items:center; gap:8px; padding:9px 14px;
+    border-bottom:1px solid var(--line); position:relative;
+  }
+  li.row:last-child{border-bottom:none;}
+  li.row .name{
+    flex:1; min-width:0; font-size:13.5px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+  }
+  li.row .name input{
+    width:100%; border:none; background:transparent; color:inherit; font:inherit; padding:2px 0;
+  }
+  li.row .amount-wrap{display:flex; align-items:center; gap:2px; flex:none;}
+  li.row .peso{color:var(--ink-faint); font-family:'IBM Plex Mono',monospace; font-size:12.5px;}
+  li.row input.amount{
+    width:96px; text-align:right; border:1px solid transparent; background:transparent;
+    color:inherit; font:inherit; font-family:'IBM Plex Mono', monospace; font-size:13px;
+    font-variant-numeric:tabular-nums; border-radius:5px; padding:4px 6px;
+  }
+  li.row input.amount:hover{background:var(--paper-sunken);}
+  li.row input.amount:focus{
+    outline:none; border-color:var(--focus); background:var(--paper);
+  }
+  li.row .save-flag{
+    width:6px; height:6px; border-radius:50%; flex:none; opacity:0; transition:opacity .3s;
+  }
+  li.row .save-flag.show{opacity:1;}
+  li.row .save-flag.ok{background:var(--fijo);}
+  li.row .save-flag.err{background:var(--danger);}
+  li.row .del{
+    flex:none; width:20px; height:20px; border-radius:5px; border:none; background:transparent;
+    color:var(--ink-faint); cursor:pointer; font-size:14px; line-height:1; opacity:0;
+    display:flex; align-items:center; justify-content:center; transition:opacity .15s, background .15s, color .15s;
+  }
+  li.row:hover .del{opacity:1;}
+  li.row .del:hover{background:var(--danger-soft); color:var(--danger);}
+  li.row.confirming .del{opacity:1; background:var(--danger-soft); color:var(--danger); width:auto; padding:0 8px; font-size:11px;}
+  li.row.confirming .name, li.row.confirming .amount-wrap{opacity:.35; pointer-events:none;}
+  li.row .cancel-del{
+    display:none; flex:none; border:none; background:transparent; color:var(--ink-faint);
+    font-size:11px; cursor:pointer; padding:0 4px;
+  }
+  li.row.confirming .cancel-del{display:inline-block;}
+
+  .skeleton{padding:9px 14px;}
+  .skeleton .bar-sk{
+    height:12px; border-radius:4px; background:linear-gradient(90deg, var(--paper-sunken), var(--line), var(--paper-sunken));
+    background-size:200% 100%; animation:shimmer 1.4s ease-in-out infinite;
+  }
+  @keyframes shimmer{0%{background-position:200% 0;}100%{background-position:-200% 0;}}
+  @media (prefers-reduced-motion:reduce){ .skeleton .bar-sk{animation:none;} }
+
+  form.add-row{padding:10px 14px 14px; border-top:1px solid var(--line);}
+  .add-toggle{
+    width:100%; text-align:left; background:transparent; border:1px dashed var(--line-strong);
+    color:var(--ink-soft); border-radius:8px; padding:8px 10px; font:inherit; font-size:12.5px;
+    cursor:pointer; transition:border-color .15s, color .15s;
+  }
+  .add-toggle:hover{border-color:var(--focus); color:var(--ink);}
+  .add-fields{display:none; flex-direction:column; gap:8px; margin-top:8px;}
+  .add-fields.show{display:flex;}
+  .add-fields input{
+    border:1px solid var(--line-strong); background:var(--paper); color:var(--ink);
+    border-radius:6px; padding:7px 9px; font:inherit; font-size:13px;
+  }
+  .add-fields input:focus{outline:none; border-color:var(--focus);}
+  .add-fields .actions{display:flex; gap:8px;}
+  .add-fields button{
+    font:inherit; font-size:12.5px; border-radius:6px; padding:7px 12px; cursor:pointer; border:1px solid transparent;
+  }
+  .btn-primary{background:var(--ink); color:var(--paper);}
+  .btn-primary:hover{opacity:.88;}
+  .btn-primary:disabled{opacity:.5; cursor:default;}
+  .btn-ghost{background:transparent; color:var(--ink-soft); border-color:var(--line-strong);}
+  .btn-ghost:hover{color:var(--ink);}
+  .add-error{font-size:11.5px; color:var(--danger); display:none;}
+  .add-error.show{display:block;}
+
+  footer.note{
+    margin-top:22px; padding-top:16px; border-top:1px solid var(--line);
+    color:var(--ink-faint); font-size:11.5px; max-width:70ch;
+  }
+  footer.note strong{color:var(--ink-soft);}
+</style>
+
+<div class="wrap">
+  <header class="top">
+    <div class="titleblock">
+      <h1>Libro de Rubros</h1>
+      <p>Finanzas Familia — categorías de ingresos, gastos fijos y variables, con su presupuesto mensual</p>
+    </div>
+    <div class="status" id="status">
+      <span class="dot" id="statusDot"></span>
+      <span id="statusText">Conectando…</span>
+    </div>
+  </header>
+
+  <div class="banner" id="banner">
+    <span id="bannerText"></span>
+    <button id="bannerAction" type="button"></button>
+  </div>
+
+  <div class="empty-state" id="emptyState">
+    <h2>No se pudo conectar con Airtable</h2>
+    <p>Este panel necesita el conector de <strong>Airtable</strong> habilitado para tu cuenta en este visor. Si ya lo conectaste, recargá la página.</p>
+  </div>
+
+  <main class="board" id="board">
+    <section class="col col-ingreso" data-grupo="Ingreso">
+      <div class="col-head">
+        <span class="bar"></span>
+        <h2>Ingresos</h2>
+        <span class="total" data-total>—</span>
+      </div>
+      <ul class="rows" data-rows>
+        <li class="skeleton"><div class="bar-sk" style="width:70%"></div></li>
+        <li class="skeleton"><div class="bar-sk" style="width:55%"></div></li>
+      </ul>
+      <form class="add-row" data-addform>
+        <button type="button" class="add-toggle" data-addtoggle>+ agregar fuente de ingreso</button>
+        <div class="add-fields" data-addfields>
+          <input type="text" placeholder="Nombre (ej. Dividendos ARCA)" data-addname maxlength="60">
+          <input type="text" inputmode="decimal" placeholder="Monto esperado mensual" data-addamount>
+          <div class="actions">
+            <button type="submit" class="btn-primary" data-addsubmit>Guardar</button>
+            <button type="button" class="btn-ghost" data-addcancel>Cancelar</button>
+          </div>
+          <span class="add-error" data-adderror></span>
+        </div>
+      </form>
+    </section>
+
+    <section class="col col-fijo" data-grupo="Fijo">
+      <div class="col-head">
+        <span class="bar"></span>
+        <h2>Gastos Fijos</h2>
+        <span class="total" data-total>—</span>
+      </div>
+      <ul class="rows" data-rows>
+        <li class="skeleton"><div class="bar-sk" style="width:80%"></div></li>
+        <li class="skeleton"><div class="bar-sk" style="width:60%"></div></li>
+        <li class="skeleton"><div class="bar-sk" style="width:70%"></div></li>
+      </ul>
+      <form class="add-row" data-addform>
+        <button type="button" class="add-toggle" data-addtoggle>+ agregar gasto fijo (ej. Monotributo)</button>
+        <div class="add-fields" data-addfields>
+          <input type="text" placeholder="Nombre (ej. Monotributo)" data-addname maxlength="60">
+          <input type="text" inputmode="decimal" placeholder="Monto esperado mensual" data-addamount>
+          <div class="actions">
+            <button type="submit" class="btn-primary" data-addsubmit>Guardar</button>
+            <button type="button" class="btn-ghost" data-addcancel>Cancelar</button>
+          </div>
+          <span class="add-error" data-adderror></span>
+        </div>
+      </form>
+    </section>
+
+    <section class="col col-variable" data-grupo="Variable">
+      <div class="col-head">
+        <span class="bar"></span>
+        <h2>Gastos Variables</h2>
+        <span class="total" data-total>—</span>
+      </div>
+      <ul class="rows" data-rows>
+        <li class="skeleton"><div class="bar-sk" style="width:65%"></div></li>
+        <li class="skeleton"><div class="bar-sk" style="width:75%"></div></li>
+        <li class="skeleton"><div class="bar-sk" style="width:50%"></div></li>
+      </ul>
+      <form class="add-row" data-addform>
+        <button type="button" class="add-toggle" data-addtoggle>+ agregar gasto variable</button>
+        <div class="add-fields" data-addfields>
+          <input type="text" placeholder="Nombre (ej. Mascotas)" data-addname maxlength="60">
+          <input type="text" inputmode="decimal" placeholder="Monto esperado mensual" data-addamount>
+          <div class="actions">
+            <button type="submit" class="btn-primary" data-addsubmit>Guardar</button>
+            <button type="button" class="btn-ghost" data-addcancel>Cancelar</button>
+          </div>
+          <span class="add-error" data-adderror></span>
+        </div>
+      </form>
+    </section>
+  </main>
+
+  <footer class="note">
+    <strong>Cómo funciona:</strong> cada cambio acá se guarda directo en la tabla <em>Presupuesto</em> de tu base de Airtable "Finanzas Familia". Un rubro nuevo que agregues acá queda disponible como presupuesto; para que también aparezca como opción al cargar un gasto real en la tabla <em>Gastos</em>, contáselo a Claude la primera vez que uses esa categoría.
+  </footer>
+</div>
+
+<script>
+(function(){
+  var BASE_ID = "YOUR_AIRTABLE_BASE_ID";
+  var TABLE_ID = "YOUR_PRESUPUESTO_TABLE_ID";
+  var F_RUBRO = "fldC1jczU6a7107EC";
+  var F_GRUPO = "fldxEdpksXTa4HaE0";
+  var F_MONTO = "fld6hrj9YNaUF4tar";
+  var F_MES = "fldRocCAtg8dxRmE6";
+
+  var MESES = ["Ene","Feb","Mar","Abr","May","Jun","Jul","Ago","Sep","Oct","Nov","Dic"];
+  function mesActualLabel(){
+    var d = new Date();
+    return MESES[d.getMonth()] + "-" + d.getFullYear();
+  }
+
+  var fmt = new Intl.NumberFormat('es-AR', {maximumFractionDigits:0});
+  function formatARS(n){ return fmt.format(Math.round(n || 0)); }
+  function parseARSInput(s){
+    if (typeof s !== "string") return 0;
+    var cleaned = s.replace(/[^\d,.\-]/g, "").replace(/\./g, "").replace(",", ".");
+    var n = parseFloat(cleaned);
+    return isFinite(n) ? n : 0;
+  }
+
+  var statusDot = document.getElementById("statusDot");
+  var statusText = document.getElementById("statusText");
+  var banner = document.getElementById("banner");
+  var bannerText = document.getElementById("bannerText");
+  var bannerAction = document.getElementById("bannerAction");
+  var emptyState = document.getElementById("emptyState");
+  var board = document.getElementById("board");
+
+  function setStatus(kind, text){
+    statusDot.className = "dot" + (kind ? " " + kind : "");
+    statusText.textContent = text;
+  }
+  function showBanner(text, actionLabel, onAction){
+    bannerText.textContent = text;
+    if (actionLabel){
+      bannerAction.style.display = "";
+      bannerAction.textContent = actionLabel;
+      bannerAction.onclick = onAction || null;
+    } else {
+      bannerAction.style.display = "none";
+    }
+    banner.classList.add("show");
+  }
+  function hideBanner(){ banner.classList.remove("show"); }
+  function showEmptyState(show){
+    emptyState.classList.toggle("show", show);
+    board.style.display = show ? "none" : "grid";
+  }
+
+  var cols = {};
+  Array.prototype.forEach.call(document.querySelectorAll("section.col"), function(sec){
+    cols[sec.getAttribute("data-grupo")] = {
+      el: sec,
+      rowsEl: sec.querySelector("[data-rows]"),
+      totalEl: sec.querySelector("[data-total]")
+    };
+  });
+
+  var rowsById = {}; // id -> {rubro, grupo, monto, mes}
+
+  function escapeHtml(s){
+    return String(s == null ? "" : s).replace(/[&<>"']/g, function(c){
+      return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c];
+    });
+  }
+
+  function render(){
+    Object.keys(cols).forEach(function(grupo){
+      var col = cols[grupo];
+      var items = Object.keys(rowsById)
+        .map(function(id){ return Object.assign({id:id}, rowsById[id]); })
+        .filter(function(r){ return r.grupo === grupo; })
+        .sort(function(a,b){ return a.rubro.localeCompare(b.rubro, 'es'); });
+
+      var total = items.reduce(function(sum, r){ return sum + (r.monto || 0); }, 0);
+      col.totalEl.textContent = "$" + formatARS(total);
+
+      col.rowsEl.innerHTML = "";
+      if (items.length === 0){
+        var li = document.createElement("li");
+        li.className = "row";
+        li.style.color = "var(--ink-faint)";
+        li.style.fontStyle = "italic";
+        li.textContent = "Sin rubros todavía";
+        col.rowsEl.appendChild(li);
+      }
+      items.forEach(function(item){ col.rowsEl.appendChild(buildRow(item)); });
+    });
+  }
+
+  function buildRow(item){
+    var li = document.createElement("li");
+    li.className = "row";
+    li.dataset.id = item.id;
+    li.innerHTML =
+      '<span class="name" title="' + escapeHtml(item.rubro) + '">' + escapeHtml(item.rubro) + '</span>' +
+      '<span class="save-flag" data-flag></span>' +
+      '<div class="amount-wrap"><span class="peso">$</span>' +
+        '<input class="amount" type="text" inputmode="decimal" value="' + formatARS(item.monto) + '" data-amountinput></div>' +
+      '<button type="button" class="del" data-del title="Borrar rubro">✕</button>' +
+      '<button type="button" class="cancel-del" data-canceldel>volver</button>';
+
+    var input = li.querySelector("[data-amountinput]");
+    var flag = li.querySelector("[data-flag]");
+
+    input.addEventListener("focus", function(){ input.value = String(Math.round(item.monto || 0)); input.select(); });
+    input.addEventListener("blur", function(){
+      var newVal = parseARSInput(input.value);
+      input.value = formatARS(newVal);
+      if (newVal === item.monto) return;
+      saveAmount(item.id, newVal, input, flag);
+    });
+    input.addEventListener("keydown", function(e){
+      if (e.key === "Enter"){ input.blur(); }
+      if (e.key === "Escape"){ input.value = formatARS(item.monto); input.blur(); }
+    });
+
+    var delBtn = li.querySelector("[data-del]");
+    var cancelBtn = li.querySelector("[data-canceldel]");
+    delBtn.addEventListener("click", function(){
+      if (!li.classList.contains("confirming")){
+        li.classList.add("confirming");
+        delBtn.textContent = "confirmar borrado";
+        return;
+      }
+      deleteRow(item.id, li);
+    });
+    cancelBtn.addEventListener("click", function(){
+      li.classList.remove("confirming");
+      delBtn.textContent = "✕";
+    });
+
+    return li;
+  }
+
+  function flashFlag(flag, ok){
+    flag.className = "save-flag show " + (ok ? "ok" : "err");
+    setTimeout(function(){ flag.classList.remove("show"); }, 1600);
+  }
+
+  var mcpPromise = (window.claude ? window.claude.use("mcp") : Promise.resolve(null));
+
+  function callAirtable(tool, input){
+    return mcpPromise.then(function(mcp){
+      if (!mcp) return Promise.reject({code:"capability_disabled"});
+      return mcp.callTool("Airtable", tool, input);
+    });
+  }
+
+  function saveAmount(id, newVal, input, flag){
+    var prev = rowsById[id] ? rowsById[id].monto : 0;
+    if (rowsById[id]) rowsById[id].monto = newVal;
+    var col = cols[rowsById[id] ? rowsById[id].grupo : null];
+    if (col){
+      var total = Object.keys(rowsById).filter(function(k){return rowsById[k].grupo === rowsById[id].grupo;})
+        .reduce(function(s,k){return s + (rowsById[k].monto||0);}, 0);
+      col.totalEl.textContent = "$" + formatARS(total);
+    }
+    callAirtable("update_records_for_table", {
+      baseId: BASE_ID, tableId: TABLE_ID,
+      records: [{id: id, fields: (function(){ var f = {}; f[F_MONTO] = newVal; return f; })()}]
+    }).then(function(){
+      flashFlag(flag, true);
+      mcpPromise.then(function(mcp){ if (mcp) mcp.invalidate("Airtable", "list_records_for_table"); });
+    }).catch(function(err){
+      flashFlag(flag, false);
+      if (rowsById[id]) rowsById[id].monto = prev;
+      input.value = formatARS(prev);
+      if (col){
+        var total2 = Object.keys(rowsById).filter(function(k){return rowsById[k].grupo === rowsById[id].grupo;})
+          .reduce(function(s,k){return s + (rowsById[k].monto||0);}, 0);
+        col.totalEl.textContent = "$" + formatARS(total2);
+      }
+    });
+  }
+
+  function deleteRow(id, li){
+    li.style.opacity = "0.4";
+    callAirtable("delete_records_for_table", {baseId: BASE_ID, tableId: TABLE_ID, recordIds: [id]})
+      .then(function(){
+        delete rowsById[id];
+        render();
+        mcpPromise.then(function(mcp){ if (mcp) mcp.invalidate("Airtable", "list_records_for_table"); });
+      })
+      .catch(function(){
+        li.style.opacity = "1";
+        li.classList.remove("confirming");
+      });
+  }
+
+  Array.prototype.forEach.call(document.querySelectorAll("form[data-addform]"), function(form){
+    var toggle = form.querySelector("[data-addtoggle]");
+    var fields = form.querySelector("[data-addfields]");
+    var nameInput = form.querySelector("[data-addname]");
+    var amountInput = form.querySelector("[data-addamount]");
+    var submitBtn = form.querySelector("[data-addsubmit]");
+    var cancelBtn = form.querySelector("[data-addcancel]");
+    var errorEl = form.querySelector("[data-adderror]");
+    var grupo = form.closest("section.col").getAttribute("data-grupo");
+
+    toggle.addEventListener("click", function(){
+      fields.classList.add("show");
+      toggle.style.display = "none";
+      nameInput.focus();
+    });
+    cancelBtn.addEventListener("click", function(){
+      fields.classList.remove("show");
+      toggle.style.display = "";
+      nameInput.value = ""; amountInput.value = ""; errorEl.classList.remove("show");
+    });
+
+    form.addEventListener("submit", function(e){
+      e.preventDefault();
+      var nombre = nameInput.value.trim();
+      if (!nombre){
+        errorEl.textContent = "Poné un nombre para el rubro.";
+        errorEl.classList.add("show");
+        return;
+      }
+      var monto = parseARSInput(amountInput.value || "0");
+      submitBtn.disabled = true;
+      errorEl.classList.remove("show");
+
+      var fields2 = {};
+      fields2[F_RUBRO] = nombre;
+      fields2[F_GRUPO] = grupo;
+      fields2[F_MONTO] = monto;
+      fields2[F_MES] = mesActualLabel();
+
+      callAirtable("create_records_for_table", {
+        baseId: BASE_ID, tableId: TABLE_ID, records: [{fields: fields2}]
+      }).then(function(res){
+        submitBtn.disabled = false;
+        var rec = res && res.payload && res.payload.records && res.payload.records[0];
+        if (rec){
+          rowsById[rec.id] = {rubro: nombre, grupo: grupo, monto: monto, mes: mesActualLabel()};
+          render();
+        }
+        nameInput.value = ""; amountInput.value = "";
+        fields.classList.remove("show");
+        toggle.style.display = "";
+        mcpPromise.then(function(mcp){ if (mcp) mcp.invalidate("Airtable", "list_records_for_table"); });
+      }).catch(function(err){
+        submitBtn.disabled = false;
+        errorEl.textContent = "No se pudo guardar (" + (err && err.code || "error") + "). Probá de nuevo.";
+        errorEl.classList.add("show");
+      });
+    });
+  });
+
+  function applyPayload(payload){
+    if (!payload || !payload.records) return;
+    rowsById = {};
+    payload.records.forEach(function(rec){
+      var f = rec.cellValuesByFieldId || {};
+      var grupoVal = f[F_GRUPO];
+      var grupoName = grupoVal && typeof grupoVal === "object" ? grupoVal.name : grupoVal;
+      rowsById[rec.id] = {
+        rubro: f[F_RUBRO] || "(sin nombre)",
+        grupo: grupoName,
+        monto: typeof f[F_MONTO] === "number" ? f[F_MONTO] : 0,
+        mes: f[F_MES] || ""
+      };
+    });
+    render();
+  }
+
+  function degradedCopy(code){
+    switch(code){
+      case "needs_reauth":
+        return {text:"Se venció el acceso a Airtable.", action:"Reconectar", href:true};
+      case "server_not_connected":
+        return {text:"Airtable no está conectado en esta cuenta.", action:"Conectar", href:true};
+      case "selection_required":
+        return {text:"Elegí qué cuenta de Airtable usar en claude.ai.", action:null};
+      case "blocked_by_policy":
+        return {text:"Tu organización bloqueó el acceso a Airtable acá.", action:null};
+      case "approval_required":
+        return {text:"Esta acción necesita aprobación de tu organización.", action:null};
+      default:
+        return {text:"Airtable no respondió. Reintentando…", action:null};
+    }
+  }
+
+  mcpPromise.then(function(mcp){
+    if (!mcp){
+      setStatus("err", "Sin conector");
+      showEmptyState(true);
+      return;
+    }
+    setStatus("warn", "Cargando…");
+    mcp.watchTool("Airtable", "list_records_for_table", {baseId: BASE_ID, tableId: TABLE_ID},
+      function(ev){
+        if (ev.type === "data"){
+          hideBanner();
+          showEmptyState(false);
+          setStatus("ok", "Conectado — Finanzas Familia");
+          applyPayload(ev.result.payload);
+        } else {
+          var code = ev.error && ev.error.code;
+          var authIssues = ["needs_reauth","server_not_connected","selection_required","blocked_by_policy","approval_required"];
+          if (authIssues.indexOf(code) !== -1){
+            setStatus("err", "Desconectado");
+            var info = degradedCopy(code);
+            showBanner(info.text, info.action, info.action ? function(){
+              window.open("https://claude.ai/settings/connectors", "_blank");
+            } : null);
+            if (Object.keys(rowsById).length === 0) showEmptyState(true);
+          } else {
+            setStatus("warn", "Reintentando…");
+            showBanner(degradedCopy(code).text, null);
+          }
+        }
+      },
+      {refetchInterval: 60000}
+    );
+  }).catch(function(){
+    setStatus("err", "Sin conector");
+    showEmptyState(true);
+  });
+})();
+</script>
