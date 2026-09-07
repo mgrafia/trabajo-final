@@ -307,6 +307,57 @@
     font-variant-numeric:tabular-nums; min-width:9ch; text-align:right;
   }
 
+  /* ---------- vencimientos tab ---------- */
+  ul.due-list{list-style:none; margin:0 0 18px; padding:0;}
+  li.due-row{
+    display:flex; align-items:center; gap:12px; padding:11px 16px;
+    background:var(--paper-raised); border:1px solid var(--line); border-radius:10px; box-shadow:var(--shadow);
+    margin-bottom:8px;
+  }
+  li.due-row .due-chip{
+    flex:none; width:42px; height:42px; border-radius:10px; display:flex; flex-direction:column;
+    align-items:center; justify-content:center; background:var(--paper-sunken); line-height:1.1;
+  }
+  li.due-row .due-chip .n{font-family:'IBM Plex Mono', monospace; font-size:15px; font-weight:500;}
+  li.due-row .due-chip .lbl{font-size:8px; color:var(--ink-faint); text-transform:uppercase;}
+  li.due-row.soon .due-chip{background:var(--danger-soft); color:var(--danger);}
+  li.due-row .due-main{flex:1; min-width:0;}
+  li.due-row .due-name{font-size:13.5px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; display:block;}
+  li.due-row .due-sub{font-size:11px; color:var(--ink-faint); margin-top:1px;}
+  li.due-row.soon .due-sub{color:var(--danger);}
+  li.due-row .due-amount{
+    flex:none; font-family:'IBM Plex Mono', monospace; font-size:13px; font-weight:500;
+    font-variant-numeric:tabular-nums;
+  }
+  li.due-row .due-input{
+    flex:none; width:44px; text-align:center; border:1px solid var(--line-strong); background:var(--paper);
+    color:inherit; font:inherit; font-family:'IBM Plex Mono', monospace; font-size:12.5px; border-radius:6px; padding:4px 2px;
+  }
+  li.due-row .due-input:focus{outline:none; border-color:var(--focus);}
+  .due-section-title{
+    font-family:'Spectral', serif; font-weight:600; font-size:14px; margin:0 0 8px; color:var(--ink-soft);
+  }
+  form.add-row.standalone-add{
+    background:var(--paper-raised); border:1px solid var(--line); border-top:1px solid var(--line);
+    border-radius:10px; box-shadow:var(--shadow); padding:12px 14px; margin-bottom:18px;
+  }
+
+  /* ---------- graficos tab ---------- */
+  .chart-card{
+    background:var(--paper-raised); border:1px solid var(--line); border-radius:12px; box-shadow:var(--shadow);
+    padding:16px; margin-bottom:18px; overflow-x:auto;
+  }
+  .chart-card h2{font-family:'Spectral', serif; font-weight:600; font-size:15px; margin:0 0 12px;}
+  .chart-card svg{display:block; max-width:100%;}
+  .chart-axis{fill:var(--ink-faint); font-family:'IBM Plex Mono', monospace; font-size:10px;}
+  .chart-value{fill:var(--ink); font-family:'IBM Plex Mono', monospace; font-size:10px; font-weight:500;}
+  .chart-legend{list-style:none; margin:12px 0 0; padding:0; display:flex; flex-wrap:wrap; gap:10px 18px;}
+  .chart-legend li{display:flex; align-items:center; gap:6px; font-size:12px; color:var(--ink-soft);}
+  .chart-legend .swatch{width:9px; height:9px; border-radius:2px; flex:none;}
+  .chart-legend .val{
+    font-family:'IBM Plex Mono', monospace; color:var(--ink); font-variant-numeric:tabular-nums;
+  }
+
   footer.note{
     margin-top:22px; padding-top:16px; border-top:1px solid var(--line);
     color:var(--ink-faint); font-size:11.5px; max-width:70ch;
@@ -330,6 +381,8 @@
     <button type="button" class="active" data-tabbtn="gastos">Gastos del mes</button>
     <button type="button" data-tabbtn="presupuesto">Presupuesto</button>
     <button type="button" data-tabbtn="consumo">Consumo</button>
+    <button type="button" data-tabbtn="vencimientos">Vencimientos</button>
+    <button type="button" data-tabbtn="graficos">Gráficos</button>
   </nav>
 
   <div class="banner" id="banner">
@@ -532,6 +585,54 @@
       </footer>
     </section>
 
+    <!-- ===================== VENCIMIENTOS TAB ===================== -->
+    <section class="tabpanel" data-tabpanel="vencimientos">
+      <h2 class="due-section-title">Gastos fijos</h2>
+      <ul class="due-list" id="dueFijosList">
+        <li class="due-row"><span class="due-main">Cargando…</span></li>
+      </ul>
+
+      <h2 class="due-section-title">Tarjetas de crédito</h2>
+      <ul class="due-list" id="dueTarjetasList">
+        <li class="due-row"><span class="due-main">Cargando…</span></li>
+      </ul>
+
+      <form class="add-row standalone-add" data-addtarjeta>
+        <button type="button" class="add-toggle" data-addtoggle>+ agregar tarjeta</button>
+        <div class="add-fields" data-addfields>
+          <input type="text" placeholder="Tarjeta/Banco (ej. Visa BBVA)" data-addname maxlength="60">
+          <input type="text" inputmode="numeric" placeholder="Día de vencimiento (1-31)" data-addday>
+          <input type="text" inputmode="decimal" placeholder="Monto del resumen (opcional)" data-addamount>
+          <div class="actions">
+            <button type="submit" class="btn-primary" data-addsubmit>Guardar</button>
+            <button type="button" class="btn-ghost" data-addcancel>Cancelar</button>
+          </div>
+          <span class="add-error" data-adderror></span>
+        </div>
+      </form>
+
+      <footer class="note">
+        <strong>Cómo funciona:</strong> el día de los gastos fijos se edita en el campo junto a cada uno (se guarda en <em>Presupuesto</em>). Las tarjetas son una lista aparte solo para recordatorio de vencimiento y monto del resumen — no se suman al total de gastos, porque esas compras ya están contadas una por una en <em>Gastos</em>.
+      </footer>
+    </section>
+
+    <!-- ===================== GRAFICOS TAB ===================== -->
+    <section class="tabpanel" data-tabpanel="graficos">
+      <div class="chart-card">
+        <h2>Evolución mensual — Fijo vs. Variable</h2>
+        <svg id="chartEvolucion" viewBox="0 0 640 220" role="img" aria-label="Gastos fijos y variables de los últimos meses"></svg>
+        <ul class="chart-legend">
+          <li><span class="swatch" style="background:var(--fijo);"></span>Fijo</li>
+          <li><span class="swatch" style="background:var(--variable);"></span>Variable</li>
+        </ul>
+      </div>
+      <div class="chart-card">
+        <h2 id="chartRubroTitle">Gasto por rubro</h2>
+        <svg id="chartRubro" viewBox="0 0 640 260" role="img" aria-label="Distribución del gasto por rubro"></svg>
+        <ul class="chart-legend" id="chartRubroLegend"></ul>
+      </div>
+    </section>
+
   </div>
 </div>
 
@@ -543,6 +644,12 @@
   var F_GRUPO = "fldxEdpksXTa4HaE0";
   var F_MONTO = "fld6hrj9YNaUF4tar";
   var F_MES = "fldRocCAtg8dxRmE6";
+  var F_DIA = "fldK7mTG2QOhsGFNY";
+
+  var TARJ_TABLE = "YOUR_TARJETAS_TABLE_ID";
+  var TJ_NOMBRE = "fldtew3Tq6FSPz1Kb";
+  var TJ_DIA = "fldAYdfZGfJVr1h25";
+  var TJ_MONTO = "fldJOgNAluZaHtw2Z";
 
   var GASTOS_TABLE = "YOUR_GASTOS_TABLE_ID";
   var G_FECHA = "fldIPMR9hqPtleZbx";
@@ -646,9 +753,10 @@
     });
   }
 
-  var connectedTables = {presupuesto:false, gastos:false, ingresos:false, items:false};
+  var connectedTables = {presupuesto:false, gastos:false, ingresos:false, items:false, tarjetas:false};
   function anyConnected(){
-    return connectedTables.presupuesto || connectedTables.gastos || connectedTables.ingresos || connectedTables.items;
+    return connectedTables.presupuesto || connectedTables.gastos || connectedTables.ingresos ||
+      connectedTables.items || connectedTables.tarjetas;
   }
 
   /* ================= PRESUPUESTO TAB (rubro editor) ================= */
@@ -936,6 +1044,8 @@
         txnList.appendChild(li);
       });
     }
+
+    renderGraficos();
   }
 
   /* ================= CONSUMO TAB (product-level analysis) ================= */
@@ -1047,6 +1157,308 @@
     }
   }
 
+  /* ================= VENCIMIENTOS TAB ================= */
+  var tarjetasById = {}; // id -> {nombre, dia, monto}
+  var dueFijosList = document.getElementById("dueFijosList");
+  var dueTarjetasList = document.getElementById("dueTarjetasList");
+
+  function daysUntil(dia){
+    if (!dia || dia < 1 || dia > 31) return null;
+    var now = new Date();
+    var todayDay = now.getDate();
+    var diff = dia - todayDay;
+    if (diff < 0) diff += 30; // approx days remaining until next month's due day
+    return diff;
+  }
+
+  function buildDueRow(nombre, dia, monto, onDiaChange, onDelete){
+    var li = document.createElement("li");
+    var diff = daysUntil(dia);
+    var soon = diff !== null && diff <= 3;
+    li.className = "due-row" + (soon ? " soon" : "");
+    var chipN = dia ? String(dia) : "—";
+    var sub = dia == null ? "sin día cargado" : (diff === 0 ? "vence hoy" : diff === 1 ? "vence mañana" : "en " + diff + " días");
+    li.innerHTML =
+      '<div class="due-chip"><span class="n">' + escapeHtml(chipN) + '</span><span class="lbl">día</span></div>' +
+      '<div class="due-main"><span class="due-name" title="' + escapeHtml(nombre) + '">' + escapeHtml(nombre) + '</span>' +
+        '<div class="due-sub">' + sub + '</div></div>' +
+      '<span class="due-amount">' + (monto ? "$" + formatARS(monto) : "") + '</span>' +
+      '<input class="due-input" type="text" inputmode="numeric" value="' + (dia || "") + '" placeholder="día" data-diainput>' +
+      (onDelete ? '<button type="button" class="del" data-del title="Borrar">✕</button>' : '');
+
+    var input = li.querySelector("[data-diainput]");
+    input.addEventListener("blur", function(){
+      var v = parseInt(input.value, 10);
+      if (!v || v < 1 || v > 31) v = null;
+      onDiaChange(v);
+    });
+    input.addEventListener("keydown", function(e){ if (e.key === "Enter") input.blur(); });
+
+    if (onDelete){
+      var delBtn = li.querySelector("[data-del]");
+      delBtn.style.opacity = "1";
+      delBtn.addEventListener("click", function(){
+        if (!li.classList.contains("confirming")){
+          li.classList.add("confirming");
+          delBtn.textContent = "confirmar";
+          return;
+        }
+        onDelete();
+      });
+    }
+    return li;
+  }
+
+  function renderVencimientos(){
+    var fijos = Object.keys(presupuestoById)
+      .map(function(id){ return Object.assign({id:id}, presupuestoById[id]); })
+      .filter(function(p){ return p.grupo === "Fijo"; })
+      .sort(function(a,b){
+        var da = daysUntil(a.dia), db = daysUntil(b.dia);
+        if (da === null && db === null) return a.rubro.localeCompare(b.rubro, 'es');
+        if (da === null) return 1;
+        if (db === null) return -1;
+        return da - db;
+      });
+
+    dueFijosList.innerHTML = "";
+    if (fijos.length === 0){
+      dueFijosList.innerHTML = '<li class="due-row"><span class="due-main" style="color:var(--ink-faint);font-style:italic;">Sin gastos fijos cargados</span></li>';
+    } else {
+      fijos.forEach(function(p){
+        dueFijosList.appendChild(buildDueRow(p.rubro, p.dia, p.monto, function(newDia){
+          presupuestoById[p.id].dia = newDia;
+          renderVencimientos();
+          callAirtable("update_records_for_table", {
+            baseId: BASE_ID, tableId: PRES_TABLE,
+            records: [{id: p.id, fields: (function(){ var f={}; f[F_DIA]=newDia; return f; })()}]
+          }).then(function(){
+            mcpPromise.then(function(mcp){ if (mcp) mcp.invalidate("Airtable", "list_records_for_table"); });
+          });
+        }, null));
+      });
+    }
+
+    var tarjetas = Object.keys(tarjetasById)
+      .map(function(id){ return Object.assign({id:id}, tarjetasById[id]); })
+      .sort(function(a,b){
+        var da = daysUntil(a.dia), db = daysUntil(b.dia);
+        if (da === null && db === null) return a.nombre.localeCompare(b.nombre, 'es');
+        if (da === null) return 1;
+        if (db === null) return -1;
+        return da - db;
+      });
+
+    dueTarjetasList.innerHTML = "";
+    if (tarjetas.length === 0){
+      dueTarjetasList.innerHTML = '<li class="due-row"><span class="due-main" style="color:var(--ink-faint);font-style:italic;">Sin tarjetas cargadas</span></li>';
+    } else {
+      tarjetas.forEach(function(t){
+        dueTarjetasList.appendChild(buildDueRow(t.nombre, t.dia, t.monto, function(newDia){
+          tarjetasById[t.id].dia = newDia;
+          renderVencimientos();
+          callAirtable("update_records_for_table", {
+            baseId: BASE_ID, tableId: TARJ_TABLE,
+            records: [{id: t.id, fields: (function(){ var f={}; f[TJ_DIA]=newDia; return f; })()}]
+          }).then(function(){
+            mcpPromise.then(function(mcp){ if (mcp) mcp.invalidate("Airtable", "list_records_for_table"); });
+          });
+        }, function(){
+          callAirtable("delete_records_for_table", {baseId: BASE_ID, tableId: TARJ_TABLE, recordIds: [t.id]})
+            .then(function(){
+              delete tarjetasById[t.id];
+              renderVencimientos();
+              mcpPromise.then(function(mcp){ if (mcp) mcp.invalidate("Airtable", "list_records_for_table"); });
+            });
+        }));
+      });
+    }
+  }
+
+  var tarjetaForm = document.querySelector("[data-addtarjeta]");
+  if (tarjetaForm){
+    var tjToggle = tarjetaForm.querySelector("[data-addtoggle]");
+    var tjFields = tarjetaForm.querySelector("[data-addfields]");
+    var tjName = tarjetaForm.querySelector("[data-addname]");
+    var tjDay = tarjetaForm.querySelector("[data-addday]");
+    var tjAmount = tarjetaForm.querySelector("[data-addamount]");
+    var tjSubmit = tarjetaForm.querySelector("[data-addsubmit]");
+    var tjCancel = tarjetaForm.querySelector("[data-addcancel]");
+    var tjError = tarjetaForm.querySelector("[data-adderror]");
+
+    tjToggle.addEventListener("click", function(){
+      tjFields.classList.add("show"); tjToggle.style.display = "none"; tjName.focus();
+    });
+    tjCancel.addEventListener("click", function(){
+      tjFields.classList.remove("show"); tjToggle.style.display = "";
+      tjName.value = ""; tjDay.value = ""; tjAmount.value = ""; tjError.classList.remove("show");
+    });
+    tarjetaForm.addEventListener("submit", function(e){
+      e.preventDefault();
+      var nombre = tjName.value.trim();
+      if (!nombre){
+        tjError.textContent = "Poné un nombre para la tarjeta.";
+        tjError.classList.add("show");
+        return;
+      }
+      var dia = parseInt(tjDay.value, 10);
+      if (!dia || dia < 1 || dia > 31) dia = null;
+      var monto = tjAmount.value ? parseARSInput(tjAmount.value) : 0;
+      tjSubmit.disabled = true;
+      tjError.classList.remove("show");
+
+      var f = {};
+      f[TJ_NOMBRE] = nombre;
+      if (dia !== null) f[TJ_DIA] = dia;
+      if (monto) f[TJ_MONTO] = monto;
+
+      callAirtable("create_records_for_table", { baseId: BASE_ID, tableId: TARJ_TABLE, records: [{fields: f}] })
+        .then(function(res){
+          tjSubmit.disabled = false;
+          var rec = res && res.payload && res.payload.records && res.payload.records[0];
+          if (rec){
+            tarjetasById[rec.id] = {nombre: nombre, dia: dia, monto: monto};
+            renderVencimientos();
+          }
+          tjName.value = ""; tjDay.value = ""; tjAmount.value = "";
+          tjFields.classList.remove("show"); tjToggle.style.display = "";
+          mcpPromise.then(function(mcp){ if (mcp) mcp.invalidate("Airtable", "list_records_for_table"); });
+        }).catch(function(err){
+          tjSubmit.disabled = false;
+          tjError.textContent = "No se pudo guardar (" + (err && err.code || "error") + "). Probá de nuevo.";
+          tjError.classList.add("show");
+        });
+    });
+  }
+
+  /* ================= GRAFICOS TAB ================= */
+  var SVGNS = "http://www.w3.org/2000/svg";
+  function svgEl(tag, attrs){
+    var el = document.createElementNS(SVGNS, tag);
+    Object.keys(attrs || {}).forEach(function(k){ el.setAttribute(k, attrs[k]); });
+    return el;
+  }
+  var CHART_PALETTE = ["#1F5C4E","#8B5E1F","#2A5C8A","#B23A2E","#6B5B95","#3F7D6B","#B77A2E","#4A7FA8","#8C4B4B","#5C6F52"];
+
+  function monthKeysBack(n){
+    var out = [];
+    var d = new Date();
+    d.setDate(1);
+    for (var i = n - 1; i >= 0; i--){
+      var dt = new Date(d.getFullYear(), d.getMonth() - i, 1);
+      out.push({key: dt.getFullYear() + "-" + String(dt.getMonth()+1).padStart(2,"0"), label: MESES[dt.getMonth()], year: dt.getFullYear(), month: dt.getMonth()});
+    }
+    return out;
+  }
+
+  function renderEvolucionChart(){
+    var svg = document.getElementById("chartEvolucion");
+    svg.innerHTML = "";
+    var months = monthKeysBack(6);
+    var gastos = Object.keys(gastosById).map(function(id){ return gastosById[id]; });
+
+    var data = months.map(function(m){
+      var fijo = 0, variable = 0;
+      gastos.forEach(function(g){
+        if (!g.fecha) return;
+        var y = parseInt(g.fecha.slice(0,4),10), mo = parseInt(g.fecha.slice(5,7),10)-1;
+        if (y === m.year && mo === m.month){
+          if (g.tipo === "Fijo") fijo += g.monto; else variable += g.monto;
+        }
+      });
+      return {label: m.label, fijo: fijo, variable: variable, total: fijo + variable};
+    });
+
+    var W = 640, H = 220, padL = 8, padR = 8, padT = 20, padB = 28;
+    var chartW = W - padL - padR, chartH = H - padT - padB;
+    var maxTotal = Math.max.apply(null, data.map(function(d){ return d.total; }).concat([1]));
+    var n = data.length;
+    var slot = chartW / n;
+    var barW = Math.min(46, slot * 0.55);
+
+    data.forEach(function(d, i){
+      var cx = padL + slot * i + slot / 2;
+      var hFijo = maxTotal > 0 ? (d.fijo / maxTotal) * chartH : 0;
+      var hVar = maxTotal > 0 ? (d.variable / maxTotal) * chartH : 0;
+      var yBase = padT + chartH;
+      if (d.variable > 0){
+        svg.appendChild(svgEl("rect", {x: cx - barW/2, y: yBase - hVar, width: barW, height: Math.max(hVar,0), fill: "var(--variable)", rx:2}));
+      }
+      if (d.fijo > 0){
+        svg.appendChild(svgEl("rect", {x: cx - barW/2, y: yBase - hVar - hFijo, width: barW, height: Math.max(hFijo,0), fill: "var(--fijo)", rx:2}));
+      }
+      if (d.total > 0){
+        var t = svgEl("text", {x: cx, y: yBase - hVar - hFijo - 6, "text-anchor":"middle", class:"chart-value"});
+        t.textContent = d.total >= 1000 ? (d.total/1000).toFixed(0) + "k" : "$" + formatARS(d.total);
+        svg.appendChild(t);
+      }
+      var lbl = svgEl("text", {x: cx, y: H - 8, "text-anchor":"middle", class:"chart-axis"});
+      lbl.textContent = d.label;
+      svg.appendChild(lbl);
+    });
+  }
+
+  function renderRubroChart(){
+    var svg = document.getElementById("chartRubro");
+    var legend = document.getElementById("chartRubroLegend");
+    var title = document.getElementById("chartRubroTitle");
+    svg.innerHTML = "";
+    legend.innerHTML = "";
+    title.textContent = "Gasto por rubro — " + MESES_LARGO[viewMonth] + " " + viewYear;
+
+    var byRubro = {};
+    Object.keys(gastosById).forEach(function(id){
+      var g = gastosById[id];
+      if (!inViewMonth(g.fecha)) return;
+      byRubro[g.rubro || "Sin rubro"] = (byRubro[g.rubro || "Sin rubro"] || 0) + g.monto;
+    });
+    var rubros = Object.keys(byRubro).sort(function(a,b){ return byRubro[b] - byRubro[a]; });
+    var total = rubros.reduce(function(s,r){ return s + byRubro[r]; }, 0);
+
+    if (rubros.length === 0 || total === 0){
+      var msg = svgEl("text", {x:320, y:130, "text-anchor":"middle", class:"chart-axis"});
+      msg.textContent = "Sin gastos este mes";
+      svg.appendChild(msg);
+      return;
+    }
+
+    var cx = 130, cy = 130, rOuter = 100, rInner = 58;
+    var angleStart = -Math.PI/2;
+    rubros.forEach(function(r, i){
+      var frac = byRubro[r] / total;
+      var angleEnd = angleStart + frac * Math.PI * 2;
+      var color = CHART_PALETTE[i % CHART_PALETTE.length];
+      var x1 = cx + rOuter * Math.cos(angleStart), y1 = cy + rOuter * Math.sin(angleStart);
+      var x2 = cx + rOuter * Math.cos(angleEnd), y2 = cy + rOuter * Math.sin(angleEnd);
+      var xi1 = cx + rInner * Math.cos(angleEnd), yi1 = cy + rInner * Math.sin(angleEnd);
+      var xi2 = cx + rInner * Math.cos(angleStart), yi2 = cy + rInner * Math.sin(angleStart);
+      var largeArc = (angleEnd - angleStart) > Math.PI ? 1 : 0;
+      var d = "M" + x1 + "," + y1 +
+        " A" + rOuter + "," + rOuter + " 0 " + largeArc + " 1 " + x2 + "," + y2 +
+        " L" + xi1 + "," + yi1 +
+        " A" + rInner + "," + rInner + " 0 " + largeArc + " 0 " + xi2 + "," + yi2 + " Z";
+      svg.appendChild(svgEl("path", {d: d, fill: color}));
+      angleStart = angleEnd;
+
+      var li = document.createElement("li");
+      li.innerHTML = '<span class="swatch" style="background:' + color + ';"></span>' +
+        escapeHtml(r) + ' <span class="val">$' + formatARS(byRubro[r]) + '</span>';
+      legend.appendChild(li);
+    });
+
+    var totalLbl = svgEl("text", {x: cx, y: cy - 4, "text-anchor":"middle", class:"chart-value", style:"font-size:13px;"});
+    totalLbl.textContent = "$" + formatARS(total);
+    svg.appendChild(totalLbl);
+    var totalSub = svgEl("text", {x: cx, y: cy + 12, "text-anchor":"middle", class:"chart-axis"});
+    totalSub.textContent = "total";
+    svg.appendChild(totalSub);
+  }
+
+  function renderGraficos(){
+    renderEvolucionChart();
+    renderRubroChart();
+  }
+
   /* ================= data loading ================= */
   function applyPresupuestoPayload(payload){
     if (!payload || !payload.records) return;
@@ -1056,10 +1468,12 @@
       presupuestoById[rec.id] = {
         rubro: f[F_RUBRO] || "(sin nombre)",
         grupo: selectName(f[F_GRUPO]),
-        monto: typeof f[F_MONTO] === "number" ? f[F_MONTO] : 0
+        monto: typeof f[F_MONTO] === "number" ? f[F_MONTO] : 0,
+        dia: typeof f[F_DIA] === "number" ? f[F_DIA] : null
       };
     });
     renderPresupuesto();
+    renderVencimientos();
   }
   function applyGastosPayload(payload){
     if (!payload || !payload.records) return;
@@ -1103,6 +1517,19 @@
       };
     });
     renderConsumoTab();
+  }
+  function applyTarjetasPayload(payload){
+    if (!payload || !payload.records) return;
+    tarjetasById = {};
+    payload.records.forEach(function(rec){
+      var f = rec.cellValuesByFieldId || {};
+      tarjetasById[rec.id] = {
+        nombre: f[TJ_NOMBRE] || "(sin nombre)",
+        dia: typeof f[TJ_DIA] === "number" ? f[TJ_DIA] : null,
+        monto: typeof f[TJ_MONTO] === "number" ? f[TJ_MONTO] : 0
+      };
+    });
+    renderVencimientos();
   }
 
   function watchTable(key, tableId, apply){
@@ -1148,6 +1575,7 @@
     watchTable("gastos", GASTOS_TABLE, applyGastosPayload)(mcp);
     watchTable("ingresos", ING_TABLE, applyIngresosPayload)(mcp);
     watchTable("items", ITEMS_TABLE, applyItemsPayload)(mcp);
+    watchTable("tarjetas", TARJ_TABLE, applyTarjetasPayload)(mcp);
   }).catch(function(){
     setStatus("err", "Sin conector");
     showEmptyState(true);
@@ -1155,5 +1583,6 @@
 
   renderGastosTab();
   renderConsumoTab();
+  renderVencimientos();
 })();
 </script>

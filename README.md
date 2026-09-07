@@ -24,14 +24,19 @@ Cualquier conversación nueva que se abra necesita recibir el contexto de este R
 | Fecha | Monto | Fuente | Descripción |
 
 ### Tabla `Presupuesto`
-| Rubro | Grupo (Ingreso/Fijo/Variable) | Monto esperado mensual | Mes de referencia |
+| Rubro | Grupo (Ingreso/Fijo/Variable) | Monto esperado mensual | Mes de referencia | Día de vencimiento |
 
-Refleja el monto objetivo *actual* por rubro (no histórico mes a mes, para no consumir el límite de registros del plan gratuito de Airtable). Se edita a mano para planificar meses futuros — es la tabla que se usa para armar presupuesto.
+Refleja el monto objetivo *actual* por rubro (no histórico mes a mes, para no consumir el límite de registros del plan gratuito de Airtable). Se edita a mano para planificar meses futuros — es la tabla que se usa para armar presupuesto. El **Día de vencimiento** (1-31) es para gastos fijos: en los que caen siempre el mismo día (ej. Alquiler) se carga una sola vez; en los que varían mes a mes (ej. Expensas, Monotributo) se actualiza cuando llega la nueva fecha, igual que el monto.
 
 ### Tabla `Items Supermercado`
 | Producto | Fecha | Cantidad | Precio unitario | Categoría | Gasto relacionado (link a Gastos) |
 
 Detalle ítem por ítem de las compras de supermercado (cuando hay ticket/factura con detalle disponible, sea de un ticket completo o de un producto suelto), para detectar consumo recurrente vs. puntual y proyectar/optimizar compras futuras. Cualquier gasto de Rubro = Supermercado debería tener también su detalle acá, no solo el total en `Gastos`.
+
+### Tabla `Tarjetas`
+| Tarjeta/Banco | Día de vencimiento | Monto del resumen |
+
+Solo para recordatorio de cuándo vence cada resumen de tarjeta y cuánto es, aproximado. **No se suma al total de gastos** — las compras hechas con esas tarjetas ya están contadas una por una en `Gastos`; sumar el resumen acá también duplicaría el total.
 
 ## Rubros
 
@@ -78,6 +83,8 @@ Se ve tanto desde la web de Airtable como desde su app mobile.
 - **Gastos del mes**: navegación mes a mes (no todo mezclado), con ingresos/gastos/saldo del mes, gasto real por rubro comparado contra lo presupuestado (Fijos y Variables, con barra de avance y aviso si se pasó), y el listado de movimientos reales de `Gastos` de ese mes.
 - **Presupuesto**: gestión de la tabla `Presupuesto` — ver los rubros de Ingresos/Fijos/Variables agrupados con su monto esperado, editarlo inline, borrar un rubro, o agregar uno nuevo (ej. "Monotributo" como gasto fijo).
 - **Consumo**: análisis histórico de `Items Supermercado` — gasto por categoría, y productos separados en recurrentes (aparecen en 2+ compras, con precio promedio) vs. puntuales, para anticipar la próxima compra y detectar qué conviene comprar por mayor.
+- **Vencimientos**: gastos fijos y tarjetas ordenados por proximidad ("vence en 3 días"), con el día editable ahí mismo. Permite agregar/editar/borrar tarjetas.
+- **Gráficos**: evolución mensual de gasto Fijo vs. Variable (últimos 6 meses) y torta de gasto por rubro del mes que se esté mirando en la pestaña Gastos del mes.
 
 Un rubro agregado en la pestaña Presupuesto queda como línea de presupuesto; para que también aparezca como opción en el campo Rubro de `Gastos` (es un singleSelect de opciones fijas) hay que decírselo a Claude la primera vez que se cargue un gasto real de esa categoría.
 
@@ -93,5 +100,7 @@ Un rubro agregado en la pestaña Presupuesto queda como línea de presupuesto; p
 - [x] Artefacto "Libro de Rubros" para gestionar categorías y presupuesto en vivo.
 - [ ] Definir cómo catalogar pagos por transferencia en Medio de pago.
 - [x] Análisis de consumo recurrente vs. puntual (pestaña Consumo del artefacto) para optimizar compras.
+- [x] Gráficos de evolución mensual y gasto por rubro (pestaña Gráficos del artefacto).
+- [x] Vencimientos de gastos fijos y tarjetas de crédito (pestaña Vencimientos del artefacto).
 - [ ] Cartera de inversiones (acciones, ONs, bonos) cargada manualmente, con cotización actualizada al consultar.
 - [ ] Proyección de ingresos futuros combinando sueldo + cartera.
