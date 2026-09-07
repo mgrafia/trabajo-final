@@ -631,12 +631,8 @@
         <ul class="chart-legend">
           <li><span class="swatch" style="background:var(--fijo);"></span>Fijo</li>
           <li><span class="swatch" style="background:var(--variable);"></span>Variable</li>
+          <li><span class="swatch" style="background:var(--ingreso);"></span>Ingresos</li>
         </ul>
-      </div>
-      <div class="chart-card">
-        <h2 id="chartRubroTitle">Cumplimiento de presupuesto</h2>
-        <svg id="chartRubro" viewBox="0 0 640 260" role="img" aria-label="Porcentaje de presupuesto usado por rubro"></svg>
-        <p class="chart-note" id="chartRubroNote"></p>
       </div>
       <div class="chart-card">
         <h2 id="chartDonutTitle">Distribución del gasto por rubro</h2>
@@ -646,6 +642,11 @@
             <div class="skeleton" style="padding:12px 0;"><div class="bar-sk" style="width:60%"></div></div>
           </div>
         </div>
+      </div>
+      <div class="chart-card">
+        <h2 id="chartRubroTitle">Cumplimiento de presupuesto</h2>
+        <svg id="chartRubro" viewBox="0 0 640 260" role="img" aria-label="Porcentaje de presupuesto usado por rubro"></svg>
+        <p class="chart-note" id="chartRubroNote"></p>
       </div>
     </section>
 
@@ -1372,9 +1373,10 @@
     svg.innerHTML = "";
     var months = monthKeysBack(6);
     var gastos = Object.keys(gastosById).map(function(id){ return gastosById[id]; });
+    var ingresos = Object.keys(ingresosById).map(function(id){ return ingresosById[id]; });
 
     var data = months.map(function(m){
-      var fijo = 0, variable = 0;
+      var fijo = 0, variable = 0, ingreso = 0;
       gastos.forEach(function(g){
         if (!g.fecha) return;
         var y = parseInt(g.fecha.slice(0,4),10), mo = parseInt(g.fecha.slice(5,7),10)-1;
@@ -1382,21 +1384,27 @@
           if (g.tipo === "Fijo") fijo += g.monto; else variable += g.monto;
         }
       });
-      return {label: m.label, fijo: fijo, variable: variable, total: fijo + variable};
+      ingresos.forEach(function(g){
+        if (!g.fecha) return;
+        var y = parseInt(g.fecha.slice(0,4),10), mo = parseInt(g.fecha.slice(5,7),10)-1;
+        if (y === m.year && mo === m.month) ingreso += g.monto;
+      });
+      return {label: m.label, fijo: fijo, variable: variable, total: fijo + variable, ingreso: ingreso};
     });
 
-    var W = 640, H = 220, padL = 8, padR = 8, padT = 20, padB = 28;
+    var W = 640, H = 220, padL = 8, padR = 8, padT = 26, padB = 28;
     var chartW = W - padL - padR, chartH = H - padT - padB;
-    var maxTotal = Math.max.apply(null, data.map(function(d){ return d.total; }).concat([1]));
+    var maxTotal = Math.max.apply(null, data.map(function(d){ return Math.max(d.total, d.ingreso); }).concat([1]));
     var n = data.length;
     var slot = chartW / n;
     var barW = Math.min(46, slot * 0.55);
+    var yBase = padT + chartH;
+    function yFor(v){ return yBase - (maxTotal > 0 ? (v / maxTotal) * chartH : 0); }
 
     data.forEach(function(d, i){
       var cx = padL + slot * i + slot / 2;
       var hFijo = maxTotal > 0 ? (d.fijo / maxTotal) * chartH : 0;
       var hVar = maxTotal > 0 ? (d.variable / maxTotal) * chartH : 0;
-      var yBase = padT + chartH;
       if (d.variable > 0){
         svg.appendChild(svgEl("rect", {x: cx - barW/2, y: yBase - hVar, width: barW, height: Math.max(hVar,0), fill: "var(--variable)", rx:2}));
       }
@@ -1411,6 +1419,21 @@
       var lbl = svgEl("text", {x: cx, y: H - 8, "text-anchor":"middle", class:"chart-axis"});
       lbl.textContent = d.label;
       svg.appendChild(lbl);
+    });
+
+    var pts = data.map(function(d, i){ return (padL + slot * i + slot / 2) + "," + yFor(d.ingreso); }).join(" ");
+    svg.appendChild(svgEl("polyline", {
+      points: pts, fill: "none", stroke: "var(--ingreso)", "stroke-width": 2,
+      "stroke-linejoin":"round", "stroke-linecap":"round"
+    }));
+    data.forEach(function(d, i){
+      var cx = padL + slot * i + slot / 2, cy = yFor(d.ingreso);
+      svg.appendChild(svgEl("circle", {cx: cx, cy: cy, r: 3.5, fill: "var(--ingreso)"}));
+      if (d.ingreso > 0){
+        var t2 = svgEl("text", {x: cx, y: cy - 8, "text-anchor":"middle", class:"chart-value", style:"fill:var(--ingreso);"});
+        t2.textContent = d.ingreso >= 1000 ? (d.ingreso/1000).toFixed(0) + "k" : "$" + formatARS(d.ingreso);
+        svg.appendChild(t2);
+      }
     });
   }
 
