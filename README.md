@@ -77,6 +77,7 @@ Se ve tanto desde la web de Airtable como desde su app mobile.
 
 - **Gastos del mes**: navegación mes a mes (no todo mezclado), con ingresos/gastos/saldo del mes, gasto real por rubro comparado contra lo presupuestado (Fijos y Variables, con barra de avance y aviso si se pasó), y el listado de movimientos reales de `Gastos` de ese mes.
 - **Presupuesto**: gestión de la tabla `Presupuesto` — ver los rubros de Ingresos/Fijos/Variables agrupados con su monto esperado, editarlo inline, borrar un rubro, o agregar uno nuevo (ej. "Monotributo" como gasto fijo).
+- **Consumo**: análisis histórico de `Items Supermercado` — gasto por categoría, y productos separados en recurrentes (aparecen en 2+ compras, con precio promedio) vs. puntuales, para anticipar la próxima compra y detectar qué conviene comprar por mayor.
 
 Un rubro agregado en la pestaña Presupuesto queda como línea de presupuesto; para que también aparezca como opción en el campo Rubro de `Gastos` (es un singleSelect de opciones fijas) hay que decírselo a Claude la primera vez que se cargue un gasto real de esa categoría.
 
@@ -91,6 +92,6 @@ Un rubro agregado en la pestaña Presupuesto queda como línea de presupuesto; p
 - [x] Dashboard mensual (gastos del mes, ingresos del mes, presupuesto editable).
 - [x] Artefacto "Libro de Rubros" para gestionar categorías y presupuesto en vivo.
 - [ ] Definir cómo catalogar pagos por transferencia en Medio de pago.
-- [ ] Análisis de consumo recurrente vs. puntual (Items Supermercado) para optimizar compras.
+- [x] Análisis de consumo recurrente vs. puntual (pestaña Consumo del artefacto) para optimizar compras.
 - [ ] Cartera de inversiones (acciones, ONs, bonos) cargada manualmente, con cotización actualizada al consultar.
 - [ ] Proyección de ingresos futuros combinando sueldo + cartera.
