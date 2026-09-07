@@ -88,11 +88,13 @@ Se ve tanto desde la web de Airtable como desde su app mobile.
 
 Un rubro agregado en la pestaña Presupuesto queda como línea de presupuesto; para que también aparezca como opción en el campo Rubro de `Gastos` (es un singleSelect de opciones fijas) hay que decírselo a Claude la primera vez que se cargue un gasto real de esa categoría.
 
-## Recordatorios automáticos
+## Recordatorios automáticos (pausado)
 
-Rutina en la nube ("Recordatorio de vencimientos - Finanzas Familia", `trig_018eXrGKDHMoQSyDAz8VhYdX`) que corre todos los días a las 9:00 (hora Argentina) independientemente de esta conversación o de cualquier computadora encendida. Revisa `Presupuesto` (gastos Fijos con Día de vencimiento cargado) y `Tarjetas`, y si algo vence hoy o mañana manda una notificación push al celular. Si no hay nada próximo, no avisa nada.
+Rutina en la nube ("Recordatorio de vencimientos - Finanzas Familia", `trig_018eXrGKDHMoQSyDAz8VhYdX`), pensada para correr todos los días a las 9:00 (hora Argentina) y avisar por push si algo vence hoy o mañana en `Presupuesto` (Fijos) o `Tarjetas`. La lógica funciona bien (se probó con datos reales: detectó correctamente vencimientos y la API confirmó "Mobile push requested"), pero **el push nunca llegó al celular** — quedó **deshabilitada** hasta resolver eso.
 
-Administrable desde [claude.ai/code/routines](https://claude.ai/code/routines). Al llamar a las tools de Airtable hay que pasarle los fieldIds exactos (no nombres) porque el agente en la nube adivina mal nombres con tildes o con "/" (ej. confundió "Tarjeta/Banco" con dos columnas separadas la primera vez).
+Hipótesis sin confirmar: las notificaciones de rutinas de Claude Code podrían no tener canal de entrega hacia la app de Claude de consumo estándar (son features de la superficie `claude.ai/code`, separada de la app de chat). Se probó activar permisos de notificación de la app sin éxito. Pendiente: revisar permisos de notificaciones del navegador del celular para el sitio claude.ai (push web), o directamente preguntar a soporte de Anthropic.
+
+Administrable desde [claude.ai/code/routines](https://claude.ai/code/routines). Nota técnica para cuando se retome: al llamar a las tools de Airtable hay que pasarle los fieldIds exactos (no nombres) porque el agente en la nube adivina mal nombres con tildes o con "/" (ej. confundió "Tarjeta/Banco" con dos columnas separadas la primera vez).
 
 ## Incidentes conocidos
 
@@ -108,6 +110,6 @@ Administrable desde [claude.ai/code/routines](https://claude.ai/code/routines). 
 - [x] Análisis de consumo recurrente vs. puntual (pestaña Consumo del artefacto) para optimizar compras.
 - [x] Gráficos de evolución mensual y gasto por rubro (pestaña Gráficos del artefacto).
 - [x] Vencimientos de gastos fijos y tarjetas de crédito (pestaña Vencimientos del artefacto).
-- [x] Recordatorio automático (push al celular) de vencimientos próximos, vía rutina programada en la nube.
+- [~] Recordatorio automático (push al celular) de vencimientos próximos — lógica lista y probada, pero pausada porque el push no llega al celular (ver "Recordatorios automáticos").
 - [ ] Cartera de inversiones (acciones, ONs, bonos) cargada manualmente, con cotización actualizada al consultar.
 - [ ] Proyección de ingresos futuros combinando sueldo + cartera.
