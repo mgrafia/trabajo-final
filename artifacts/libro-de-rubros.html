@@ -47,7 +47,7 @@
 
   header.top{
     display:flex; align-items:flex-end; justify-content:space-between; gap:16px;
-    flex-wrap:wrap; margin-bottom:22px; padding-bottom:18px; border-bottom:1px solid var(--line-strong);
+    flex-wrap:wrap; margin-bottom:16px; padding-bottom:18px; border-bottom:1px solid var(--line-strong);
   }
   .titleblock h1{
     font-family:'Spectral', Georgia, 'Times New Roman', serif;
@@ -63,13 +63,25 @@
   .dot.warn{background:var(--variable);}
   .dot.err{background:var(--danger);}
 
+  nav.tabs{display:flex; gap:4px; margin-bottom:20px;}
+  nav.tabs button{
+    font:inherit; font-size:13px; font-weight:500; color:var(--ink-soft); background:transparent;
+    border:none; border-bottom:2px solid transparent; padding:8px 4px; cursor:pointer; margin-right:18px;
+    transition:color .15s, border-color .15s;
+  }
+  nav.tabs button:hover{color:var(--ink);}
+  nav.tabs button.active{color:var(--ink); border-color:var(--ink);}
+
+  .tabpanel{display:none;}
+  .tabpanel.active{display:block;}
+
   .banner{
     display:none; align-items:center; gap:10px; padding:12px 14px; border-radius:8px;
     background:var(--danger-soft); color:var(--danger); font-size:13px; margin-bottom:18px;
     border:1px solid color-mix(in srgb, var(--danger) 35%, transparent);
   }
   .banner.show{display:flex;}
-  .banner button{
+  .banner button.bannerbtn{
     margin-left:auto; border:1px solid currentColor; background:transparent; color:inherit;
     border-radius:6px; padding:5px 10px; font:inherit; font-size:12px; cursor:pointer;
   }
@@ -81,12 +93,10 @@
   .empty-state.show{display:flex;}
   .empty-state h2{font-family:'Spectral', serif; font-size:19px; color:var(--ink); margin:0;}
   .empty-state p{max-width:36ch; margin:0; font-size:13px;}
-  .empty-state code{
-    background:var(--paper-sunken); padding:1px 6px; border-radius:4px;
-    font-family:'IBM Plex Mono', monospace; font-size:12px;
-  }
 
+  /* ---------- shared: column board ---------- */
   main.board{display:grid; grid-template-columns:repeat(3, 1fr); gap:18px;}
+  main.board.two-col{grid-template-columns:repeat(2, 1fr);}
   @media (max-width:820px){ main.board{grid-template-columns:1fr;} }
 
   section.col{
@@ -133,12 +143,8 @@
     font-variant-numeric:tabular-nums; border-radius:5px; padding:4px 6px;
   }
   li.row input.amount:hover{background:var(--paper-sunken);}
-  li.row input.amount:focus{
-    outline:none; border-color:var(--focus); background:var(--paper);
-  }
-  li.row .save-flag{
-    width:6px; height:6px; border-radius:50%; flex:none; opacity:0; transition:opacity .3s;
-  }
+  li.row input.amount:focus{ outline:none; border-color:var(--focus); background:var(--paper); }
+  li.row .save-flag{ width:6px; height:6px; border-radius:50%; flex:none; opacity:0; transition:opacity .3s; }
   li.row .save-flag.show{opacity:1;}
   li.row .save-flag.ok{background:var(--fijo);}
   li.row .save-flag.err{background:var(--danger);}
@@ -191,6 +197,79 @@
   .add-error{font-size:11.5px; color:var(--danger); display:none;}
   .add-error.show{display:block;}
 
+  /* ---------- gastos tab ---------- */
+  .month-nav{
+    display:flex; align-items:center; justify-content:center; gap:16px; margin-bottom:18px;
+  }
+  .month-nav button{
+    width:30px; height:30px; border-radius:8px; border:1px solid var(--line-strong); background:var(--paper-raised);
+    color:var(--ink); font-size:15px; cursor:pointer; display:flex; align-items:center; justify-content:center;
+  }
+  .month-nav button:hover{background:var(--paper-sunken);}
+  .month-nav button:disabled{opacity:.35; cursor:default;}
+  .month-nav .label{
+    font-family:'Spectral', serif; font-weight:600; font-size:17px; min-width:15ch; text-align:center;
+  }
+
+  .stat-strip{display:grid; grid-template-columns:repeat(3,1fr); gap:14px; margin-bottom:20px;}
+  @media (max-width:640px){ .stat-strip{grid-template-columns:1fr;} }
+  .stat-tile{
+    background:var(--paper-raised); border:1px solid var(--line); border-radius:12px; box-shadow:var(--shadow);
+    padding:14px 16px;
+  }
+  .stat-tile .stat-label{font-size:11.5px; color:var(--ink-soft); text-transform:uppercase; letter-spacing:.05em;}
+  .stat-tile .stat-value{
+    font-family:'IBM Plex Mono', monospace; font-size:22px; font-weight:500; margin-top:4px;
+    font-variant-numeric:tabular-nums;
+  }
+  .stat-tile.ingreso .stat-value{color:var(--ingreso);}
+  .stat-tile.gasto .stat-value{color:var(--variable);}
+  .stat-tile.saldo .stat-value.neg{color:var(--danger);}
+  .stat-tile.saldo .stat-value.pos{color:var(--fijo);}
+
+  .cmp-row{display:flex; align-items:center; gap:10px; padding:9px 14px; border-bottom:1px solid var(--line);}
+  .cmp-row:last-child{border-bottom:none;}
+  .cmp-row .name{flex:0 0 40%; font-size:13px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
+  .cmp-row .figures{flex:1; display:flex; flex-direction:column; gap:4px; min-width:0;}
+  .cmp-row .figs-line{
+    display:flex; justify-content:space-between; font-family:'IBM Plex Mono', monospace; font-size:12px;
+    font-variant-numeric:tabular-nums;
+  }
+  .cmp-row .figs-line .real{font-weight:500;}
+  .cmp-row .figs-line .presu{color:var(--ink-faint);}
+  .cmp-bar{height:5px; border-radius:3px; background:var(--paper-sunken); overflow:hidden;}
+  .cmp-bar > span{display:block; height:100%; border-radius:3px;}
+  .col-fijo .cmp-bar > span{background:var(--fijo);}
+  .col-variable .cmp-bar > span{background:var(--variable);}
+  .cmp-row.over .cmp-bar > span{background:var(--danger);}
+  .cmp-row.over .figs-line .real{color:var(--danger);}
+
+  .txn-section{
+    background:var(--paper-raised); border:1px solid var(--line); border-radius:12px; box-shadow:var(--shadow);
+    margin-top:18px; overflow:hidden;
+  }
+  .txn-head{padding:14px 16px 10px; border-bottom:1px solid var(--line);}
+  .txn-head h2{font-family:'Spectral', serif; font-weight:600; font-size:15px; margin:0;}
+  ul.txn-list{list-style:none; margin:0; padding:0; max-height:420px; overflow-y:auto;}
+  li.txn{
+    display:flex; align-items:center; gap:10px; padding:8px 16px; border-bottom:1px solid var(--line); font-size:13px;
+  }
+  li.txn:last-child{border-bottom:none;}
+  li.txn .txn-date{
+    font-family:'IBM Plex Mono', monospace; font-size:11.5px; color:var(--ink-faint); flex:none; width:5.5ch;
+  }
+  li.txn .txn-chip{
+    flex:none; font-size:10.5px; padding:2px 7px; border-radius:20px; white-space:nowrap;
+  }
+  li.txn.grp-fijo .txn-chip{background:var(--fijo-soft); color:var(--fijo);}
+  li.txn.grp-variable .txn-chip{background:var(--variable-soft); color:var(--variable);}
+  li.txn .txn-desc{flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; color:var(--ink-soft);}
+  li.txn .txn-amount{
+    flex:none; font-family:'IBM Plex Mono', monospace; font-size:13px; font-weight:500;
+    font-variant-numeric:tabular-nums;
+  }
+  .txn-empty{padding:24px 16px; text-align:center; color:var(--ink-faint); font-size:13px; font-style:italic;}
+
   footer.note{
     margin-top:22px; padding-top:16px; border-top:1px solid var(--line);
     color:var(--ink-faint); font-size:11.5px; max-width:70ch;
@@ -202,7 +281,7 @@
   <header class="top">
     <div class="titleblock">
       <h1>Libro de Rubros</h1>
-      <p>Finanzas Familia — categorías de ingresos, gastos fijos y variables, con su presupuesto mensual</p>
+      <p>Finanzas Familia — gastos reales por mes, separados del presupuesto</p>
     </div>
     <div class="status" id="status">
       <span class="dot" id="statusDot"></span>
@@ -210,9 +289,14 @@
     </div>
   </header>
 
+  <nav class="tabs">
+    <button type="button" class="active" data-tabbtn="gastos">Gastos del mes</button>
+    <button type="button" data-tabbtn="presupuesto">Presupuesto</button>
+  </nav>
+
   <div class="banner" id="banner">
     <span id="bannerText"></span>
-    <button id="bannerAction" type="button"></button>
+    <button class="bannerbtn" id="bannerAction" type="button"></button>
   </div>
 
   <div class="empty-state" id="emptyState">
@@ -220,97 +304,173 @@
     <p>Este panel necesita el conector de <strong>Airtable</strong> habilitado para tu cuenta en este visor. Si ya lo conectaste, recargá la página.</p>
   </div>
 
-  <main class="board" id="board">
-    <section class="col col-ingreso" data-grupo="Ingreso">
-      <div class="col-head">
-        <span class="bar"></span>
-        <h2>Ingresos</h2>
-        <span class="total" data-total>—</span>
+  <div id="appBody">
+
+    <!-- ===================== GASTOS TAB ===================== -->
+    <section class="tabpanel active" data-tabpanel="gastos">
+      <div class="month-nav">
+        <button type="button" id="prevMonth" aria-label="Mes anterior">‹</button>
+        <span class="label" id="monthLabel">—</span>
+        <button type="button" id="nextMonth" aria-label="Mes siguiente">›</button>
       </div>
-      <ul class="rows" data-rows>
-        <li class="skeleton"><div class="bar-sk" style="width:70%"></div></li>
-        <li class="skeleton"><div class="bar-sk" style="width:55%"></div></li>
-      </ul>
-      <form class="add-row" data-addform>
-        <button type="button" class="add-toggle" data-addtoggle>+ agregar fuente de ingreso</button>
-        <div class="add-fields" data-addfields>
-          <input type="text" placeholder="Nombre (ej. Dividendos ARCA)" data-addname maxlength="60">
-          <input type="text" inputmode="decimal" placeholder="Monto esperado mensual" data-addamount>
-          <div class="actions">
-            <button type="submit" class="btn-primary" data-addsubmit>Guardar</button>
-            <button type="button" class="btn-ghost" data-addcancel>Cancelar</button>
-          </div>
-          <span class="add-error" data-adderror></span>
+
+      <div class="stat-strip">
+        <div class="stat-tile ingreso">
+          <div class="stat-label">Ingresos del mes</div>
+          <div class="stat-value" id="statIngresos">—</div>
         </div>
-      </form>
+        <div class="stat-tile gasto">
+          <div class="stat-label">Gastos del mes</div>
+          <div class="stat-value" id="statGastos">—</div>
+        </div>
+        <div class="stat-tile saldo">
+          <div class="stat-label">Saldo disponible</div>
+          <div class="stat-value" id="statSaldo">—</div>
+        </div>
+      </div>
+
+      <main class="board two-col">
+        <section class="col col-fijo" data-grupo="Fijo">
+          <div class="col-head">
+            <span class="bar"></span>
+            <h2>Fijos</h2>
+            <span class="total" data-cmp-total>—</span>
+          </div>
+          <div data-cmp-rows>
+            <div class="skeleton"><div class="bar-sk" style="width:80%"></div></div>
+            <div class="skeleton"><div class="bar-sk" style="width:60%"></div></div>
+          </div>
+        </section>
+        <section class="col col-variable" data-grupo="Variable">
+          <div class="col-head">
+            <span class="bar"></span>
+            <h2>Variables</h2>
+            <span class="total" data-cmp-total>—</span>
+          </div>
+          <div data-cmp-rows>
+            <div class="skeleton"><div class="bar-sk" style="width:70%"></div></div>
+            <div class="skeleton"><div class="bar-sk" style="width:55%"></div></div>
+          </div>
+        </section>
+      </main>
+
+      <section class="txn-section">
+        <div class="txn-head"><h2>Movimientos del mes</h2></div>
+        <ul class="txn-list" id="txnList">
+          <li class="txn-empty">Cargando…</li>
+        </ul>
+      </section>
     </section>
 
-    <section class="col col-fijo" data-grupo="Fijo">
-      <div class="col-head">
-        <span class="bar"></span>
-        <h2>Gastos Fijos</h2>
-        <span class="total" data-total>—</span>
-      </div>
-      <ul class="rows" data-rows>
-        <li class="skeleton"><div class="bar-sk" style="width:80%"></div></li>
-        <li class="skeleton"><div class="bar-sk" style="width:60%"></div></li>
-        <li class="skeleton"><div class="bar-sk" style="width:70%"></div></li>
-      </ul>
-      <form class="add-row" data-addform>
-        <button type="button" class="add-toggle" data-addtoggle>+ agregar gasto fijo (ej. Monotributo)</button>
-        <div class="add-fields" data-addfields>
-          <input type="text" placeholder="Nombre (ej. Monotributo)" data-addname maxlength="60">
-          <input type="text" inputmode="decimal" placeholder="Monto esperado mensual" data-addamount>
-          <div class="actions">
-            <button type="submit" class="btn-primary" data-addsubmit>Guardar</button>
-            <button type="button" class="btn-ghost" data-addcancel>Cancelar</button>
+    <!-- ===================== PRESUPUESTO TAB ===================== -->
+    <section class="tabpanel" data-tabpanel="presupuesto">
+      <main class="board" id="board">
+        <section class="col col-ingreso" data-grupo="Ingreso">
+          <div class="col-head">
+            <span class="bar"></span>
+            <h2>Ingresos</h2>
+            <span class="total" data-total>—</span>
           </div>
-          <span class="add-error" data-adderror></span>
-        </div>
-      </form>
+          <ul class="rows" data-rows>
+            <li class="skeleton"><div class="bar-sk" style="width:70%"></div></li>
+            <li class="skeleton"><div class="bar-sk" style="width:55%"></div></li>
+          </ul>
+          <form class="add-row" data-addform>
+            <button type="button" class="add-toggle" data-addtoggle>+ agregar fuente de ingreso</button>
+            <div class="add-fields" data-addfields>
+              <input type="text" placeholder="Nombre (ej. Dividendos ARCA)" data-addname maxlength="60">
+              <input type="text" inputmode="decimal" placeholder="Monto esperado mensual" data-addamount>
+              <div class="actions">
+                <button type="submit" class="btn-primary" data-addsubmit>Guardar</button>
+                <button type="button" class="btn-ghost" data-addcancel>Cancelar</button>
+              </div>
+              <span class="add-error" data-adderror></span>
+            </div>
+          </form>
+        </section>
+
+        <section class="col col-fijo" data-grupo="Fijo">
+          <div class="col-head">
+            <span class="bar"></span>
+            <h2>Gastos Fijos</h2>
+            <span class="total" data-total>—</span>
+          </div>
+          <ul class="rows" data-rows>
+            <li class="skeleton"><div class="bar-sk" style="width:80%"></div></li>
+            <li class="skeleton"><div class="bar-sk" style="width:60%"></div></li>
+            <li class="skeleton"><div class="bar-sk" style="width:70%"></div></li>
+          </ul>
+          <form class="add-row" data-addform>
+            <button type="button" class="add-toggle" data-addtoggle>+ agregar gasto fijo (ej. Monotributo)</button>
+            <div class="add-fields" data-addfields>
+              <input type="text" placeholder="Nombre (ej. Monotributo)" data-addname maxlength="60">
+              <input type="text" inputmode="decimal" placeholder="Monto esperado mensual" data-addamount>
+              <div class="actions">
+                <button type="submit" class="btn-primary" data-addsubmit>Guardar</button>
+                <button type="button" class="btn-ghost" data-addcancel>Cancelar</button>
+              </div>
+              <span class="add-error" data-adderror></span>
+            </div>
+          </form>
+        </section>
+
+        <section class="col col-variable" data-grupo="Variable">
+          <div class="col-head">
+            <span class="bar"></span>
+            <h2>Gastos Variables</h2>
+            <span class="total" data-total>—</span>
+          </div>
+          <ul class="rows" data-rows>
+            <li class="skeleton"><div class="bar-sk" style="width:65%"></div></li>
+            <li class="skeleton"><div class="bar-sk" style="width:75%"></div></li>
+            <li class="skeleton"><div class="bar-sk" style="width:50%"></div></li>
+          </ul>
+          <form class="add-row" data-addform>
+            <button type="button" class="add-toggle" data-addtoggle>+ agregar gasto variable</button>
+            <div class="add-fields" data-addfields>
+              <input type="text" placeholder="Nombre (ej. Mascotas)" data-addname maxlength="60">
+              <input type="text" inputmode="decimal" placeholder="Monto esperado mensual" data-addamount>
+              <div class="actions">
+                <button type="submit" class="btn-primary" data-addsubmit>Guardar</button>
+                <button type="button" class="btn-ghost" data-addcancel>Cancelar</button>
+              </div>
+              <span class="add-error" data-adderror></span>
+            </div>
+          </form>
+        </section>
+      </main>
+
+      <footer class="note">
+        <strong>Cómo funciona:</strong> cada cambio acá se guarda directo en la tabla <em>Presupuesto</em> de tu base de Airtable "Finanzas Familia". Un rubro nuevo que agregues acá queda disponible como presupuesto; para que también aparezca como opción al cargar un gasto real en la tabla <em>Gastos</em>, contáselo a Claude la primera vez que uses esa categoría.
+      </footer>
     </section>
 
-    <section class="col col-variable" data-grupo="Variable">
-      <div class="col-head">
-        <span class="bar"></span>
-        <h2>Gastos Variables</h2>
-        <span class="total" data-total>—</span>
-      </div>
-      <ul class="rows" data-rows>
-        <li class="skeleton"><div class="bar-sk" style="width:65%"></div></li>
-        <li class="skeleton"><div class="bar-sk" style="width:75%"></div></li>
-        <li class="skeleton"><div class="bar-sk" style="width:50%"></div></li>
-      </ul>
-      <form class="add-row" data-addform>
-        <button type="button" class="add-toggle" data-addtoggle>+ agregar gasto variable</button>
-        <div class="add-fields" data-addfields>
-          <input type="text" placeholder="Nombre (ej. Mascotas)" data-addname maxlength="60">
-          <input type="text" inputmode="decimal" placeholder="Monto esperado mensual" data-addamount>
-          <div class="actions">
-            <button type="submit" class="btn-primary" data-addsubmit>Guardar</button>
-            <button type="button" class="btn-ghost" data-addcancel>Cancelar</button>
-          </div>
-          <span class="add-error" data-adderror></span>
-        </div>
-      </form>
-    </section>
-  </main>
-
-  <footer class="note">
-    <strong>Cómo funciona:</strong> cada cambio acá se guarda directo en la tabla <em>Presupuesto</em> de tu base de Airtable "Finanzas Familia". Un rubro nuevo que agregues acá queda disponible como presupuesto; para que también aparezca como opción al cargar un gasto real en la tabla <em>Gastos</em>, contáselo a Claude la primera vez que uses esa categoría.
-  </footer>
+  </div>
 </div>
 
 <script>
 (function(){
   var BASE_ID = "YOUR_AIRTABLE_BASE_ID";
-  var TABLE_ID = "YOUR_PRESUPUESTO_TABLE_ID";
+  var PRES_TABLE = "YOUR_PRESUPUESTO_TABLE_ID";
   var F_RUBRO = "fldC1jczU6a7107EC";
   var F_GRUPO = "fldxEdpksXTa4HaE0";
   var F_MONTO = "fld6hrj9YNaUF4tar";
   var F_MES = "fldRocCAtg8dxRmE6";
 
+  var GASTOS_TABLE = "YOUR_GASTOS_TABLE_ID";
+  var G_FECHA = "fldIPMR9hqPtleZbx";
+  var G_MONTO = "fldy63GmsNw6SMLDA";
+  var G_TIPO = "fld92mjevDhlqKX4J";
+  var G_RUBRO = "fldgdW4KK5ZkoiR9L";
+  var G_DESC = "fld7BTsYhcVQRErf7";
+
+  var ING_TABLE = "YOUR_INGRESOS_TABLE_ID";
+  var I_FECHA = "fld57YZQT6OJy6O2s";
+  var I_MONTO = "fldmd5lu7C7oSxbJE";
+  var I_FUENTE = "fldEOpiPEMPv2cqIO";
+
   var MESES = ["Ene","Feb","Mar","Abr","May","Jun","Jul","Ago","Sep","Oct","Nov","Dic"];
+  var MESES_LARGO = ["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"];
   function mesActualLabel(){
     var d = new Date();
     return MESES[d.getMonth()] + "-" + d.getFullYear();
@@ -324,14 +484,34 @@
     var n = parseFloat(cleaned);
     return isFinite(n) ? n : 0;
   }
+  function escapeHtml(s){
+    return String(s == null ? "" : s).replace(/[&<>"']/g, function(c){
+      return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c];
+    });
+  }
+  function selectName(val){ return val && typeof val === "object" ? val.name : val; }
 
+  /* ---------------- tabs ---------------- */
+  var tabBtns = document.querySelectorAll("[data-tabbtn]");
+  var tabPanels = document.querySelectorAll("[data-tabpanel]");
+  Array.prototype.forEach.call(tabBtns, function(btn){
+    btn.addEventListener("click", function(){
+      Array.prototype.forEach.call(tabBtns, function(b){ b.classList.toggle("active", b === btn); });
+      var name = btn.getAttribute("data-tabbtn");
+      Array.prototype.forEach.call(tabPanels, function(p){
+        p.classList.toggle("active", p.getAttribute("data-tabpanel") === name);
+      });
+    });
+  });
+
+  /* ---------------- shared status / banner ---------------- */
   var statusDot = document.getElementById("statusDot");
   var statusText = document.getElementById("statusText");
   var banner = document.getElementById("banner");
   var bannerText = document.getElementById("bannerText");
   var bannerAction = document.getElementById("bannerAction");
   var emptyState = document.getElementById("emptyState");
-  var board = document.getElementById("board");
+  var appBody = document.getElementById("appBody");
 
   function setStatus(kind, text){
     statusDot.className = "dot" + (kind ? " " + kind : "");
@@ -351,31 +531,45 @@
   function hideBanner(){ banner.classList.remove("show"); }
   function showEmptyState(show){
     emptyState.classList.toggle("show", show);
-    board.style.display = show ? "none" : "grid";
+    appBody.style.display = show ? "none" : "block";
+  }
+  function degradedCopy(code){
+    switch(code){
+      case "needs_reauth": return {text:"Se venció el acceso a Airtable.", action:"Reconectar"};
+      case "server_not_connected": return {text:"Airtable no está conectado en esta cuenta.", action:"Conectar"};
+      case "selection_required": return {text:"Elegí qué cuenta de Airtable usar en claude.ai.", action:null};
+      case "blocked_by_policy": return {text:"Tu organización bloqueó el acceso a Airtable acá.", action:null};
+      case "approval_required": return {text:"Esta acción necesita aprobación de tu organización.", action:null};
+      default: return {text:"Airtable no respondió. Reintentando…", action:null};
+    }
   }
 
-  var cols = {};
-  Array.prototype.forEach.call(document.querySelectorAll("section.col"), function(sec){
-    cols[sec.getAttribute("data-grupo")] = {
-      el: sec,
+  var mcpPromise = (window.claude ? window.claude.use("mcp") : Promise.resolve(null));
+  function callAirtable(tool, input){
+    return mcpPromise.then(function(mcp){
+      if (!mcp) return Promise.reject({code:"capability_disabled"});
+      return mcp.callTool("Airtable", tool, input);
+    });
+  }
+
+  var connectedTables = {presupuesto:false, gastos:false, ingresos:false};
+  function anyConnected(){ return connectedTables.presupuesto || connectedTables.gastos || connectedTables.ingresos; }
+
+  /* ================= PRESUPUESTO TAB (rubro editor) ================= */
+  var presCols = {};
+  Array.prototype.forEach.call(document.querySelectorAll('[data-tabpanel="presupuesto"] section.col'), function(sec){
+    presCols[sec.getAttribute("data-grupo")] = {
       rowsEl: sec.querySelector("[data-rows]"),
       totalEl: sec.querySelector("[data-total]")
     };
   });
+  var presupuestoById = {}; // id -> {rubro, grupo, monto}
 
-  var rowsById = {}; // id -> {rubro, grupo, monto, mes}
-
-  function escapeHtml(s){
-    return String(s == null ? "" : s).replace(/[&<>"']/g, function(c){
-      return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c];
-    });
-  }
-
-  function render(){
-    Object.keys(cols).forEach(function(grupo){
-      var col = cols[grupo];
-      var items = Object.keys(rowsById)
-        .map(function(id){ return Object.assign({id:id}, rowsById[id]); })
+  function renderPresupuesto(){
+    Object.keys(presCols).forEach(function(grupo){
+      var col = presCols[grupo];
+      var items = Object.keys(presupuestoById)
+        .map(function(id){ return Object.assign({id:id}, presupuestoById[id]); })
         .filter(function(r){ return r.grupo === grupo; })
         .sort(function(a,b){ return a.rubro.localeCompare(b.rubro, 'es'); });
 
@@ -385,17 +579,16 @@
       col.rowsEl.innerHTML = "";
       if (items.length === 0){
         var li = document.createElement("li");
-        li.className = "row";
-        li.style.color = "var(--ink-faint)";
-        li.style.fontStyle = "italic";
+        li.className = "row"; li.style.color = "var(--ink-faint)"; li.style.fontStyle = "italic";
         li.textContent = "Sin rubros todavía";
         col.rowsEl.appendChild(li);
       }
-      items.forEach(function(item){ col.rowsEl.appendChild(buildRow(item)); });
+      items.forEach(function(item){ col.rowsEl.appendChild(buildPresRow(item)); });
     });
+    renderGastosTab(); // presupuesto changed -> comparison figures change too
   }
 
-  function buildRow(item){
+  function buildPresRow(item){
     var li = document.createElement("li");
     li.className = "row";
     li.dataset.id = item.id;
@@ -409,13 +602,12 @@
 
     var input = li.querySelector("[data-amountinput]");
     var flag = li.querySelector("[data-flag]");
-
     input.addEventListener("focus", function(){ input.value = String(Math.round(item.monto || 0)); input.select(); });
     input.addEventListener("blur", function(){
       var newVal = parseARSInput(input.value);
       input.value = formatARS(newVal);
       if (newVal === item.monto) return;
-      saveAmount(item.id, newVal, input, flag);
+      savePresupuestoAmount(item.id, newVal, input, flag);
     });
     input.addEventListener("keydown", function(e){
       if (e.key === "Enter"){ input.blur(); }
@@ -430,13 +622,12 @@
         delBtn.textContent = "confirmar borrado";
         return;
       }
-      deleteRow(item.id, li);
+      deletePresupuestoRow(item.id, li);
     });
     cancelBtn.addEventListener("click", function(){
       li.classList.remove("confirming");
       delBtn.textContent = "✕";
     });
-
     return li;
   }
 
@@ -445,54 +636,30 @@
     setTimeout(function(){ flag.classList.remove("show"); }, 1600);
   }
 
-  var mcpPromise = (window.claude ? window.claude.use("mcp") : Promise.resolve(null));
-
-  function callAirtable(tool, input){
-    return mcpPromise.then(function(mcp){
-      if (!mcp) return Promise.reject({code:"capability_disabled"});
-      return mcp.callTool("Airtable", tool, input);
-    });
-  }
-
-  function saveAmount(id, newVal, input, flag){
-    var prev = rowsById[id] ? rowsById[id].monto : 0;
-    if (rowsById[id]) rowsById[id].monto = newVal;
-    var col = cols[rowsById[id] ? rowsById[id].grupo : null];
-    if (col){
-      var total = Object.keys(rowsById).filter(function(k){return rowsById[k].grupo === rowsById[id].grupo;})
-        .reduce(function(s,k){return s + (rowsById[k].monto||0);}, 0);
-      col.totalEl.textContent = "$" + formatARS(total);
-    }
+  function savePresupuestoAmount(id, newVal, input, flag){
+    var prev = presupuestoById[id] ? presupuestoById[id].monto : 0;
+    if (presupuestoById[id]) presupuestoById[id].monto = newVal;
+    renderPresupuesto();
     callAirtable("update_records_for_table", {
-      baseId: BASE_ID, tableId: TABLE_ID,
+      baseId: BASE_ID, tableId: PRES_TABLE,
       records: [{id: id, fields: (function(){ var f = {}; f[F_MONTO] = newVal; return f; })()}]
     }).then(function(){
-      flashFlag(flag, true);
       mcpPromise.then(function(mcp){ if (mcp) mcp.invalidate("Airtable", "list_records_for_table"); });
-    }).catch(function(err){
-      flashFlag(flag, false);
-      if (rowsById[id]) rowsById[id].monto = prev;
-      input.value = formatARS(prev);
-      if (col){
-        var total2 = Object.keys(rowsById).filter(function(k){return rowsById[k].grupo === rowsById[id].grupo;})
-          .reduce(function(s,k){return s + (rowsById[k].monto||0);}, 0);
-        col.totalEl.textContent = "$" + formatARS(total2);
-      }
+    }).catch(function(){
+      if (presupuestoById[id]) presupuestoById[id].monto = prev;
+      renderPresupuesto();
     });
   }
 
-  function deleteRow(id, li){
+  function deletePresupuestoRow(id, li){
     li.style.opacity = "0.4";
-    callAirtable("delete_records_for_table", {baseId: BASE_ID, tableId: TABLE_ID, recordIds: [id]})
+    callAirtable("delete_records_for_table", {baseId: BASE_ID, tableId: PRES_TABLE, recordIds: [id]})
       .then(function(){
-        delete rowsById[id];
-        render();
+        delete presupuestoById[id];
+        renderPresupuesto();
         mcpPromise.then(function(mcp){ if (mcp) mcp.invalidate("Airtable", "list_records_for_table"); });
       })
-      .catch(function(){
-        li.style.opacity = "1";
-        li.classList.remove("confirming");
-      });
+      .catch(function(){ li.style.opacity = "1"; li.classList.remove("confirming"); });
   }
 
   Array.prototype.forEach.call(document.querySelectorAll("form[data-addform]"), function(form){
@@ -506,13 +673,10 @@
     var grupo = form.closest("section.col").getAttribute("data-grupo");
 
     toggle.addEventListener("click", function(){
-      fields.classList.add("show");
-      toggle.style.display = "none";
-      nameInput.focus();
+      fields.classList.add("show"); toggle.style.display = "none"; nameInput.focus();
     });
     cancelBtn.addEventListener("click", function(){
-      fields.classList.remove("show");
-      toggle.style.display = "";
+      fields.classList.remove("show"); toggle.style.display = "";
       nameInput.value = ""; amountInput.value = ""; errorEl.classList.remove("show");
     });
 
@@ -528,65 +692,229 @@
       submitBtn.disabled = true;
       errorEl.classList.remove("show");
 
-      var fields2 = {};
-      fields2[F_RUBRO] = nombre;
-      fields2[F_GRUPO] = grupo;
-      fields2[F_MONTO] = monto;
-      fields2[F_MES] = mesActualLabel();
+      var f = {};
+      f[F_RUBRO] = nombre; f[F_GRUPO] = grupo; f[F_MONTO] = monto; f[F_MES] = mesActualLabel();
 
-      callAirtable("create_records_for_table", {
-        baseId: BASE_ID, tableId: TABLE_ID, records: [{fields: fields2}]
-      }).then(function(res){
-        submitBtn.disabled = false;
-        var rec = res && res.payload && res.payload.records && res.payload.records[0];
-        if (rec){
-          rowsById[rec.id] = {rubro: nombre, grupo: grupo, monto: monto, mes: mesActualLabel()};
-          render();
-        }
-        nameInput.value = ""; amountInput.value = "";
-        fields.classList.remove("show");
-        toggle.style.display = "";
-        mcpPromise.then(function(mcp){ if (mcp) mcp.invalidate("Airtable", "list_records_for_table"); });
-      }).catch(function(err){
-        submitBtn.disabled = false;
-        errorEl.textContent = "No se pudo guardar (" + (err && err.code || "error") + "). Probá de nuevo.";
-        errorEl.classList.add("show");
-      });
+      callAirtable("create_records_for_table", { baseId: BASE_ID, tableId: PRES_TABLE, records: [{fields: f}] })
+        .then(function(res){
+          submitBtn.disabled = false;
+          var rec = res && res.payload && res.payload.records && res.payload.records[0];
+          if (rec){
+            presupuestoById[rec.id] = {rubro: nombre, grupo: grupo, monto: monto};
+            renderPresupuesto();
+          }
+          nameInput.value = ""; amountInput.value = "";
+          fields.classList.remove("show"); toggle.style.display = "";
+          mcpPromise.then(function(mcp){ if (mcp) mcp.invalidate("Airtable", "list_records_for_table"); });
+        }).catch(function(err){
+          submitBtn.disabled = false;
+          errorEl.textContent = "No se pudo guardar (" + (err && err.code || "error") + "). Probá de nuevo.";
+          errorEl.classList.add("show");
+        });
     });
   });
 
-  function applyPayload(payload){
-    if (!payload || !payload.records) return;
-    rowsById = {};
-    payload.records.forEach(function(rec){
-      var f = rec.cellValuesByFieldId || {};
-      var grupoVal = f[F_GRUPO];
-      var grupoName = grupoVal && typeof grupoVal === "object" ? grupoVal.name : grupoVal;
-      rowsById[rec.id] = {
-        rubro: f[F_RUBRO] || "(sin nombre)",
-        grupo: grupoName,
-        monto: typeof f[F_MONTO] === "number" ? f[F_MONTO] : 0,
-        mes: f[F_MES] || ""
-      };
-    });
-    render();
+  /* ================= GASTOS TAB (monthly real vs. budget) ================= */
+  var today = new Date();
+  var viewYear = today.getFullYear();
+  var viewMonth = today.getMonth(); // 0-11
+
+  var gastosById = {};   // id -> {fecha, monto, tipo, rubro, desc}
+  var ingresosById = {}; // id -> {fecha, monto, fuente}
+
+  var monthLabel = document.getElementById("monthLabel");
+  var prevMonthBtn = document.getElementById("prevMonth");
+  var nextMonthBtn = document.getElementById("nextMonth");
+  var statIngresos = document.getElementById("statIngresos");
+  var statGastos = document.getElementById("statGastos");
+  var statSaldo = document.getElementById("statSaldo");
+  var txnList = document.getElementById("txnList");
+
+  var gastosCmpCols = {};
+  Array.prototype.forEach.call(document.querySelectorAll('[data-tabpanel="gastos"] section.col'), function(sec){
+    gastosCmpCols[sec.getAttribute("data-grupo")] = {
+      rowsEl: sec.querySelector("[data-cmp-rows]"),
+      totalEl: sec.querySelector("[data-cmp-total]")
+    };
+  });
+
+  function setMonth(delta){
+    viewMonth += delta;
+    if (viewMonth < 0){ viewMonth = 11; viewYear -= 1; }
+    if (viewMonth > 11){ viewMonth = 0; viewYear += 1; }
+    renderGastosTab();
+  }
+  prevMonthBtn.addEventListener("click", function(){ setMonth(-1); });
+  nextMonthBtn.addEventListener("click", function(){ setMonth(1); });
+
+  function inViewMonth(dateStr){
+    if (!dateStr || dateStr.length < 7) return false;
+    var y = parseInt(dateStr.slice(0,4), 10);
+    var m = parseInt(dateStr.slice(5,7), 10) - 1;
+    return y === viewYear && m === viewMonth;
   }
 
-  function degradedCopy(code){
-    switch(code){
-      case "needs_reauth":
-        return {text:"Se venció el acceso a Airtable.", action:"Reconectar", href:true};
-      case "server_not_connected":
-        return {text:"Airtable no está conectado en esta cuenta.", action:"Conectar", href:true};
-      case "selection_required":
-        return {text:"Elegí qué cuenta de Airtable usar en claude.ai.", action:null};
-      case "blocked_by_policy":
-        return {text:"Tu organización bloqueó el acceso a Airtable acá.", action:null};
-      case "approval_required":
-        return {text:"Esta acción necesita aprobación de tu organización.", action:null};
-      default:
-        return {text:"Airtable no respondió. Reintentando…", action:null};
+  function renderGastosTab(){
+    monthLabel.textContent = MESES_LARGO[viewMonth] + " " + viewYear;
+
+    var gastosDelMes = Object.keys(gastosById)
+      .map(function(id){ return Object.assign({id:id}, gastosById[id]); })
+      .filter(function(g){ return inViewMonth(g.fecha); });
+    var ingresosDelMes = Object.keys(ingresosById)
+      .map(function(id){ return Object.assign({id:id}, ingresosById[id]); })
+      .filter(function(g){ return inViewMonth(g.fecha); });
+
+    var totalGastos = gastosDelMes.reduce(function(s,g){ return s + (g.monto||0); }, 0);
+    var totalIngresos = ingresosDelMes.reduce(function(s,g){ return s + (g.monto||0); }, 0);
+    var saldo = totalIngresos - totalGastos;
+
+    statIngresos.textContent = "$" + formatARS(totalIngresos);
+    statGastos.textContent = "$" + formatARS(totalGastos);
+    statSaldo.textContent = (saldo < 0 ? "-$" : "$") + formatARS(Math.abs(saldo));
+    statSaldo.className = "stat-value " + (saldo < 0 ? "neg" : "pos");
+
+    ["Fijo","Variable"].forEach(function(grupo){
+      var col = gastosCmpCols[grupo];
+      if (!col) return;
+
+      var realByRubro = {};
+      gastosDelMes.filter(function(g){ return g.tipo === grupo; }).forEach(function(g){
+        realByRubro[g.rubro] = (realByRubro[g.rubro] || 0) + (g.monto || 0);
+      });
+      var presuByRubro = {};
+      Object.keys(presupuestoById).forEach(function(id){
+        var p = presupuestoById[id];
+        if (p.grupo === grupo) presuByRubro[p.rubro] = (presuByRubro[p.rubro] || 0) + (p.monto || 0);
+      });
+
+      var rubros = Object.keys(Object.assign({}, realByRubro, presuByRubro)).sort(function(a,b){
+        return a.localeCompare(b, 'es');
+      });
+
+      var totalReal = rubros.reduce(function(s,r){ return s + (realByRubro[r]||0); }, 0);
+      col.totalEl.textContent = "$" + formatARS(totalReal);
+
+      col.rowsEl.innerHTML = "";
+      if (rubros.length === 0){
+        var empty = document.createElement("div");
+        empty.className = "cmp-row";
+        empty.innerHTML = '<span class="name" style="color:var(--ink-faint);font-style:italic;">Sin datos este mes</span>';
+        col.rowsEl.appendChild(empty);
+        return;
+      }
+      rubros.forEach(function(rubro){
+        var real = realByRubro[rubro] || 0;
+        var presu = presuByRubro[rubro] || 0;
+        var pct = presu > 0 ? (real / presu * 100) : (real > 0 ? 100 : 0);
+        var over = presu > 0 && real > presu;
+        var row = document.createElement("div");
+        row.className = "cmp-row" + (over ? " over" : "");
+        row.innerHTML =
+          '<span class="name" title="' + escapeHtml(rubro) + '">' + escapeHtml(rubro) + '</span>' +
+          '<div class="figures">' +
+            '<div class="figs-line"><span class="real">$' + formatARS(real) + '</span>' +
+              '<span class="presu">' + (presu > 0 ? "de $" + formatARS(presu) : "sin presupuesto") + '</span></div>' +
+            '<div class="cmp-bar"><span style="width:' + Math.min(pct,100).toFixed(0) + '%"></span></div>' +
+          '</div>';
+        col.rowsEl.appendChild(row);
+      });
+    });
+
+    var allTxn = gastosDelMes.slice().sort(function(a,b){ return b.fecha.localeCompare(a.fecha); });
+    txnList.innerHTML = "";
+    if (allTxn.length === 0){
+      var li0 = document.createElement("li");
+      li0.className = "txn-empty";
+      li0.textContent = "Sin movimientos cargados este mes.";
+      txnList.appendChild(li0);
+    } else {
+      allTxn.forEach(function(g){
+        var li = document.createElement("li");
+        li.className = "txn grp-" + (g.tipo === "Fijo" ? "fijo" : "variable");
+        var day = g.fecha ? g.fecha.slice(8,10) + "/" + g.fecha.slice(5,7) : "";
+        li.innerHTML =
+          '<span class="txn-date">' + day + '</span>' +
+          '<span class="txn-chip">' + escapeHtml(g.rubro || "") + '</span>' +
+          '<span class="txn-desc">' + escapeHtml(g.desc || "") + '</span>' +
+          '<span class="txn-amount">$' + formatARS(g.monto) + '</span>';
+        txnList.appendChild(li);
+      });
     }
+  }
+
+  /* ================= data loading ================= */
+  function applyPresupuestoPayload(payload){
+    if (!payload || !payload.records) return;
+    presupuestoById = {};
+    payload.records.forEach(function(rec){
+      var f = rec.cellValuesByFieldId || {};
+      presupuestoById[rec.id] = {
+        rubro: f[F_RUBRO] || "(sin nombre)",
+        grupo: selectName(f[F_GRUPO]),
+        monto: typeof f[F_MONTO] === "number" ? f[F_MONTO] : 0
+      };
+    });
+    renderPresupuesto();
+  }
+  function applyGastosPayload(payload){
+    if (!payload || !payload.records) return;
+    gastosById = {};
+    payload.records.forEach(function(rec){
+      var f = rec.cellValuesByFieldId || {};
+      gastosById[rec.id] = {
+        fecha: f[G_FECHA] || "",
+        monto: typeof f[G_MONTO] === "number" ? f[G_MONTO] : 0,
+        tipo: selectName(f[G_TIPO]),
+        rubro: selectName(f[G_RUBRO]),
+        desc: f[G_DESC] || ""
+      };
+    });
+    renderGastosTab();
+  }
+  function applyIngresosPayload(payload){
+    if (!payload || !payload.records) return;
+    ingresosById = {};
+    payload.records.forEach(function(rec){
+      var f = rec.cellValuesByFieldId || {};
+      ingresosById[rec.id] = {
+        fecha: f[I_FECHA] || "",
+        monto: typeof f[I_MONTO] === "number" ? f[I_MONTO] : 0,
+        fuente: selectName(f[I_FUENTE])
+      };
+    });
+    renderGastosTab();
+  }
+
+  function watchTable(key, tableId, apply){
+    return function(mcp){
+      mcp.watchTool("Airtable", "list_records_for_table", {baseId: BASE_ID, tableId: tableId},
+        function(ev){
+          if (ev.type === "data"){
+            connectedTables[key] = true;
+            hideBanner();
+            showEmptyState(false);
+            setStatus("ok", "Conectado — Finanzas Familia");
+            apply(ev.result.payload);
+          } else {
+            var code = ev.error && ev.error.code;
+            var authIssues = ["needs_reauth","server_not_connected","selection_required","blocked_by_policy","approval_required"];
+            if (authIssues.indexOf(code) !== -1){
+              connectedTables[key] = false;
+              setStatus("err", "Desconectado");
+              var info = degradedCopy(code);
+              showBanner(info.text, info.action, info.action ? function(){
+                window.open("https://claude.ai/settings/connectors", "_blank");
+              } : null);
+              if (!anyConnected()) showEmptyState(true);
+            } else {
+              setStatus("warn", "Reintentando…");
+              showBanner(degradedCopy(code).text, null);
+            }
+          }
+        },
+        {refetchInterval: 60000}
+      );
+    };
   }
 
   mcpPromise.then(function(mcp){
@@ -596,34 +924,14 @@
       return;
     }
     setStatus("warn", "Cargando…");
-    mcp.watchTool("Airtable", "list_records_for_table", {baseId: BASE_ID, tableId: TABLE_ID},
-      function(ev){
-        if (ev.type === "data"){
-          hideBanner();
-          showEmptyState(false);
-          setStatus("ok", "Conectado — Finanzas Familia");
-          applyPayload(ev.result.payload);
-        } else {
-          var code = ev.error && ev.error.code;
-          var authIssues = ["needs_reauth","server_not_connected","selection_required","blocked_by_policy","approval_required"];
-          if (authIssues.indexOf(code) !== -1){
-            setStatus("err", "Desconectado");
-            var info = degradedCopy(code);
-            showBanner(info.text, info.action, info.action ? function(){
-              window.open("https://claude.ai/settings/connectors", "_blank");
-            } : null);
-            if (Object.keys(rowsById).length === 0) showEmptyState(true);
-          } else {
-            setStatus("warn", "Reintentando…");
-            showBanner(degradedCopy(code).text, null);
-          }
-        }
-      },
-      {refetchInterval: 60000}
-    );
+    watchTable("presupuesto", PRES_TABLE, applyPresupuestoPayload)(mcp);
+    watchTable("gastos", GASTOS_TABLE, applyGastosPayload)(mcp);
+    watchTable("ingresos", ING_TABLE, applyIngresosPayload)(mcp);
   }).catch(function(){
     setStatus("err", "Sin conector");
     showEmptyState(true);
   });
+
+  renderGastosTab();
 })();
 </script>

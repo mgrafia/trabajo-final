@@ -73,7 +73,12 @@ Se ve tanto desde la web de Airtable como desde su app mobile.
 
 ## Artefactos
 
-**Libro de Rubros** (`artifacts/libro-de-rubros.html`) — panel para gestionar la tabla `Presupuesto`: ver los rubros de Ingresos/Fijos/Variables agrupados con su monto esperado, editarlo inline, borrar un rubro, o agregar uno nuevo (ej. "Monotributo" como gasto fijo). Se conecta en vivo a Airtable desde el navegador vía la capability `mcp` de Claude (usa el conector "Airtable" del usuario, sin exponer ningún token). Un rubro agregado ahí queda como línea de presupuesto; para que también aparezca como opción en el campo Rubro de `Gastos` (es un singleSelect de opciones fijas) hay que decírselo a Claude la primera vez que se cargue un gasto real de esa categoría.
+**Libro de Rubros** (`artifacts/libro-de-rubros.html`) — panel con dos pestañas, conectado en vivo a Airtable desde el navegador vía la capability `mcp` de Claude (usa el conector "Airtable" del usuario, sin exponer ningún token):
+
+- **Gastos del mes**: navegación mes a mes (no todo mezclado), con ingresos/gastos/saldo del mes, gasto real por rubro comparado contra lo presupuestado (Fijos y Variables, con barra de avance y aviso si se pasó), y el listado de movimientos reales de `Gastos` de ese mes.
+- **Presupuesto**: gestión de la tabla `Presupuesto` — ver los rubros de Ingresos/Fijos/Variables agrupados con su monto esperado, editarlo inline, borrar un rubro, o agregar uno nuevo (ej. "Monotributo" como gasto fijo).
+
+Un rubro agregado en la pestaña Presupuesto queda como línea de presupuesto; para que también aparezca como opción en el campo Rubro de `Gastos` (es un singleSelect de opciones fijas) hay que decírselo a Claude la primera vez que se cargue un gasto real de esa categoría.
 
 ## Incidentes conocidos
 
