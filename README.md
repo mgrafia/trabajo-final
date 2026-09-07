@@ -84,7 +84,10 @@ Se ve tanto desde la web de Airtable como desde su app mobile.
 - **Presupuesto**: gestión de la tabla `Presupuesto` — ver los rubros de Ingresos/Fijos/Variables agrupados con su monto esperado, editarlo inline, borrar un rubro, o agregar uno nuevo (ej. "Monotributo" como gasto fijo).
 - **Consumo**: análisis histórico de `Items Supermercado` — gasto por categoría, y productos separados en recurrentes (aparecen en 2+ compras, con precio promedio) vs. puntuales, para anticipar la próxima compra y detectar qué conviene comprar por mayor.
 - **Vencimientos**: gastos fijos y tarjetas ordenados por proximidad ("vence en 3 días"), con el día editable ahí mismo. Permite agregar/editar/borrar tarjetas.
-- **Gráficos**: evolución mensual de gasto Fijo vs. Variable (últimos 6 meses), y barras de "cumplimiento de presupuesto" por rubro del mes que se esté mirando en Gastos del mes — % del presupuesto usado, ordenado de mayor a menor, línea de referencia en 100% y en rojo lo que se pasó. Reemplazó a una torta de gasto por rubro que no aportaba mucho por sí sola (no decía si eso era mucho o poco).
+- **Gráficos**: tres gráficos del mes que se esté mirando en Gastos del mes —
+  1. Evolución mensual de gasto Fijo vs. Variable (últimos 6 meses).
+  2. "Cumplimiento de presupuesto": barras por rubro con % del presupuesto usado, ordenadas de mayor a menor, línea de referencia en 100% y en rojo lo que se pasó. Solo incluye rubros con presupuesto cargado (si no, el % no significa nada) — el resto queda listado aparte como nota.
+  3. "Distribución del gasto por rubro": donut con el detalle de los principales rubros al lado (nombre, monto, % del total) — incluye TODOS los rubros con gasto ese mes, tengan presupuesto cargado o no.
 
 Un rubro agregado en la pestaña Presupuesto queda como línea de presupuesto; para que también aparezca como opción en el campo Rubro de `Gastos` (es un singleSelect de opciones fijas) hay que decírselo a Claude la primera vez que se cargue un gasto real de esa categoría.
 
