@@ -88,6 +88,12 @@ Se ve tanto desde la web de Airtable como desde su app mobile.
 
 Un rubro agregado en la pestaña Presupuesto queda como línea de presupuesto; para que también aparezca como opción en el campo Rubro de `Gastos` (es un singleSelect de opciones fijas) hay que decírselo a Claude la primera vez que se cargue un gasto real de esa categoría.
 
+## Recordatorios automáticos
+
+Rutina en la nube ("Recordatorio de vencimientos - Finanzas Familia", `trig_018eXrGKDHMoQSyDAz8VhYdX`) que corre todos los días a las 9:00 (hora Argentina) independientemente de esta conversación o de cualquier computadora encendida. Revisa `Presupuesto` (gastos Fijos con Día de vencimiento cargado) y `Tarjetas`, y si algo vence hoy o mañana manda una notificación push al celular. Si no hay nada próximo, no avisa nada.
+
+Administrable desde [claude.ai/code/routines](https://claude.ai/code/routines). Al llamar a las tools de Airtable hay que pasarle los fieldIds exactos (no nombres) porque el agente en la nube adivina mal nombres con tildes o con "/" (ej. confundió "Tarjeta/Banco" con dos columnas separadas la primera vez).
+
 ## Incidentes conocidos
 
 - **Duplicación de registros**: si en el chat del celular la respuesta de Claude se queda "iterando" mucho tiempo después de confirmar una carga, puede ser que la carga ya se haya hecho y el reintento (reenviar "Sí" o un mensaje de más) genere un registro duplicado. Ya pasó una vez con una compra de supermercado (gasto + 9 items duplicados) y se corrigió a mano. Recomendación: esperar y revisar Airtable antes de reenviar la confirmación.
@@ -102,5 +108,6 @@ Un rubro agregado en la pestaña Presupuesto queda como línea de presupuesto; p
 - [x] Análisis de consumo recurrente vs. puntual (pestaña Consumo del artefacto) para optimizar compras.
 - [x] Gráficos de evolución mensual y gasto por rubro (pestaña Gráficos del artefacto).
 - [x] Vencimientos de gastos fijos y tarjetas de crédito (pestaña Vencimientos del artefacto).
+- [x] Recordatorio automático (push al celular) de vencimientos próximos, vía rutina programada en la nube.
 - [ ] Cartera de inversiones (acciones, ONs, bonos) cargada manualmente, con cotización actualizada al consultar.
 - [ ] Proyección de ingresos futuros combinando sueldo + cartera.
