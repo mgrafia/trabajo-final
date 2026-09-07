@@ -334,6 +334,14 @@
     color:inherit; font:inherit; font-family:'IBM Plex Mono', monospace; font-size:12.5px; border-radius:6px; padding:4px 2px;
   }
   li.due-row .due-input:focus{outline:none; border-color:var(--focus);}
+  .due-amounts{flex:none; display:flex; flex-direction:column; gap:3px; align-items:flex-end;}
+  .due-amount-field{display:flex; align-items:center; gap:3px;}
+  .due-amount-field .peso{font-size:10.5px; color:var(--ink-faint); font-family:'IBM Plex Mono', monospace;}
+  .due-amount-input{
+    width:76px; text-align:right; border:1px solid var(--line-strong); background:var(--paper);
+    color:inherit; font:inherit; font-family:'IBM Plex Mono', monospace; font-size:12px; border-radius:6px; padding:3px 6px;
+  }
+  .due-amount-input:focus{outline:none; border-color:var(--focus);}
   .due-section-title{
     font-family:'Spectral', serif; font-weight:600; font-size:14px; margin:0 0 8px; color:var(--ink-soft);
   }
@@ -613,7 +621,8 @@
         <div class="add-fields" data-addfields>
           <input type="text" placeholder="Tarjeta/Banco (ej. Visa BBVA)" data-addname maxlength="60">
           <input type="text" inputmode="numeric" placeholder="Día de vencimiento (1-31)" data-addday>
-          <input type="text" inputmode="decimal" placeholder="Monto del resumen (opcional)" data-addamount>
+          <input type="text" inputmode="decimal" placeholder="Monto del resumen en $ (opcional)" data-addamount>
+          <input type="text" inputmode="decimal" placeholder="Monto del resumen en US$ (opcional)" data-addamountusd>
           <div class="actions">
             <button type="submit" class="btn-primary" data-addsubmit>Guardar</button>
             <button type="button" class="btn-ghost" data-addcancel>Cancelar</button>
@@ -671,6 +680,7 @@
   var TJ_NOMBRE = "fldtew3Tq6FSPz1Kb";
   var TJ_DIA = "fldAYdfZGfJVr1h25";
   var TJ_MONTO = "fldJOgNAluZaHtw2Z";
+  var TJ_USD = "fldXa4GLRcynBBzov";
 
   var GASTOS_TABLE = "YOUR_GASTOS_TABLE_ID";
   var G_FECHA = "fldIPMR9hqPtleZbx";
@@ -1192,18 +1202,30 @@
     return diff;
   }
 
-  function buildDueRow(nombre, dia, monto, onDiaChange, onDelete){
+  function buildDueRow(nombre, dia, monto, usd, onDiaChange, onDelete, onAmountChange){
     var li = document.createElement("li");
     var diff = daysUntil(dia);
     var soon = diff !== null && diff <= 3;
     li.className = "due-row" + (soon ? " soon" : "");
     var chipN = dia ? String(dia) : "—";
     var sub = dia == null ? "sin día cargado" : (diff === 0 ? "vence hoy" : diff === 1 ? "vence mañana" : "en " + diff + " días");
+
+    var amountHtml;
+    if (onAmountChange){
+      amountHtml =
+        '<div class="due-amounts">' +
+          '<div class="due-amount-field"><span class="peso">$</span><input class="due-amount-input" type="text" inputmode="decimal" value="' + (monto ? formatARS(monto) : "") + '" placeholder="0" data-arsinput></div>' +
+          '<div class="due-amount-field"><span class="peso">US$</span><input class="due-amount-input" type="text" inputmode="decimal" value="' + (usd ? formatARS(usd) : "") + '" placeholder="0" data-usdinput></div>' +
+        '</div>';
+    } else {
+      amountHtml = '<span class="due-amount">' + (monto ? "$" + formatARS(monto) : "") + '</span>';
+    }
+
     li.innerHTML =
       '<div class="due-chip"><span class="n">' + escapeHtml(chipN) + '</span><span class="lbl">día</span></div>' +
       '<div class="due-main"><span class="due-name" title="' + escapeHtml(nombre) + '">' + escapeHtml(nombre) + '</span>' +
         '<div class="due-sub">' + sub + '</div></div>' +
-      '<span class="due-amount">' + (monto ? "$" + formatARS(monto) : "") + '</span>' +
+      amountHtml +
       '<input class="due-input" type="text" inputmode="numeric" value="' + (dia || "") + '" placeholder="día" data-diainput>' +
       (onDelete ? '<button type="button" class="del" data-del title="Borrar">✕</button>' : '');
 
@@ -1214,6 +1236,23 @@
       onDiaChange(v);
     });
     input.addEventListener("keydown", function(e){ if (e.key === "Enter") input.blur(); });
+
+    if (onAmountChange){
+      var arsInput = li.querySelector("[data-arsinput]");
+      var usdInput = li.querySelector("[data-usdinput]");
+      arsInput.addEventListener("blur", function(){
+        var v = parseARSInput(arsInput.value);
+        arsInput.value = v ? formatARS(v) : "";
+        onAmountChange("ars", v);
+      });
+      arsInput.addEventListener("keydown", function(e){ if (e.key === "Enter") arsInput.blur(); });
+      usdInput.addEventListener("blur", function(){
+        var v = parseARSInput(usdInput.value);
+        usdInput.value = v ? formatARS(v) : "";
+        onAmountChange("usd", v);
+      });
+      usdInput.addEventListener("keydown", function(e){ if (e.key === "Enter") usdInput.blur(); });
+    }
 
     if (onDelete){
       var delBtn = li.querySelector("[data-del]");
@@ -1247,7 +1286,7 @@
       dueFijosList.innerHTML = '<li class="due-row"><span class="due-main" style="color:var(--ink-faint);font-style:italic;">Sin gastos fijos cargados</span></li>';
     } else {
       fijos.forEach(function(p){
-        dueFijosList.appendChild(buildDueRow(p.rubro, p.dia, p.monto, function(newDia){
+        dueFijosList.appendChild(buildDueRow(p.rubro, p.dia, p.monto, null, function(newDia){
           presupuestoById[p.id].dia = newDia;
           renderVencimientos();
           callAirtable("update_records_for_table", {
@@ -1256,7 +1295,7 @@
           }).then(function(){
             mcpPromise.then(function(mcp){ if (mcp) mcp.invalidate("Airtable", "list_records_for_table"); });
           });
-        }, null));
+        }, null, null));
       });
     }
 
@@ -1275,7 +1314,7 @@
       dueTarjetasList.innerHTML = '<li class="due-row"><span class="due-main" style="color:var(--ink-faint);font-style:italic;">Sin tarjetas cargadas</span></li>';
     } else {
       tarjetas.forEach(function(t){
-        dueTarjetasList.appendChild(buildDueRow(t.nombre, t.dia, t.monto, function(newDia){
+        dueTarjetasList.appendChild(buildDueRow(t.nombre, t.dia, t.monto, t.usd, function(newDia){
           tarjetasById[t.id].dia = newDia;
           renderVencimientos();
           callAirtable("update_records_for_table", {
@@ -1291,6 +1330,15 @@
               renderVencimientos();
               mcpPromise.then(function(mcp){ if (mcp) mcp.invalidate("Airtable", "list_records_for_table"); });
             });
+        }, function(kind, val){
+          var fieldId = kind === "usd" ? TJ_USD : TJ_MONTO;
+          if (kind === "usd") tarjetasById[t.id].usd = val; else tarjetasById[t.id].monto = val;
+          callAirtable("update_records_for_table", {
+            baseId: BASE_ID, tableId: TARJ_TABLE,
+            records: [{id: t.id, fields: (function(){ var f={}; f[fieldId]=val; return f; })()}]
+          }).then(function(){
+            mcpPromise.then(function(mcp){ if (mcp) mcp.invalidate("Airtable", "list_records_for_table"); });
+          });
         }));
       });
     }
@@ -1303,6 +1351,7 @@
     var tjName = tarjetaForm.querySelector("[data-addname]");
     var tjDay = tarjetaForm.querySelector("[data-addday]");
     var tjAmount = tarjetaForm.querySelector("[data-addamount]");
+    var tjAmountUsd = tarjetaForm.querySelector("[data-addamountusd]");
     var tjSubmit = tarjetaForm.querySelector("[data-addsubmit]");
     var tjCancel = tarjetaForm.querySelector("[data-addcancel]");
     var tjError = tarjetaForm.querySelector("[data-adderror]");
@@ -1312,7 +1361,7 @@
     });
     tjCancel.addEventListener("click", function(){
       tjFields.classList.remove("show"); tjToggle.style.display = "";
-      tjName.value = ""; tjDay.value = ""; tjAmount.value = ""; tjError.classList.remove("show");
+      tjName.value = ""; tjDay.value = ""; tjAmount.value = ""; tjAmountUsd.value = ""; tjError.classList.remove("show");
     });
     tarjetaForm.addEventListener("submit", function(e){
       e.preventDefault();
@@ -1325,6 +1374,7 @@
       var dia = parseInt(tjDay.value, 10);
       if (!dia || dia < 1 || dia > 31) dia = null;
       var monto = tjAmount.value ? parseARSInput(tjAmount.value) : 0;
+      var usd = tjAmountUsd.value ? parseARSInput(tjAmountUsd.value) : 0;
       tjSubmit.disabled = true;
       tjError.classList.remove("show");
 
@@ -1332,16 +1382,17 @@
       f[TJ_NOMBRE] = nombre;
       if (dia !== null) f[TJ_DIA] = dia;
       if (monto) f[TJ_MONTO] = monto;
+      if (usd) f[TJ_USD] = usd;
 
       callAirtable("create_records_for_table", { baseId: BASE_ID, tableId: TARJ_TABLE, records: [{fields: f}] })
         .then(function(res){
           tjSubmit.disabled = false;
           var rec = res && res.payload && res.payload.records && res.payload.records[0];
           if (rec){
-            tarjetasById[rec.id] = {nombre: nombre, dia: dia, monto: monto};
+            tarjetasById[rec.id] = {nombre: nombre, dia: dia, monto: monto, usd: usd};
             renderVencimientos();
           }
-          tjName.value = ""; tjDay.value = ""; tjAmount.value = "";
+          tjName.value = ""; tjDay.value = ""; tjAmount.value = ""; tjAmountUsd.value = "";
           tjFields.classList.remove("show"); tjToggle.style.display = "";
           mcpPromise.then(function(mcp){ if (mcp) mcp.invalidate("Airtable", "list_records_for_table"); });
         }).catch(function(err){
@@ -1661,7 +1712,8 @@
       tarjetasById[rec.id] = {
         nombre: f[TJ_NOMBRE] || "(sin nombre)",
         dia: typeof f[TJ_DIA] === "number" ? f[TJ_DIA] : null,
-        monto: typeof f[TJ_MONTO] === "number" ? f[TJ_MONTO] : 0
+        monto: typeof f[TJ_MONTO] === "number" ? f[TJ_MONTO] : 0,
+        usd: typeof f[TJ_USD] === "number" ? f[TJ_USD] : 0
       };
     });
     renderVencimientos();

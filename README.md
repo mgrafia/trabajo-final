@@ -34,7 +34,7 @@ Refleja el monto objetivo *actual* por rubro (no histórico mes a mes, para no c
 Detalle ítem por ítem de las compras de supermercado (cuando hay ticket/factura con detalle disponible, sea de un ticket completo o de un producto suelto), para detectar consumo recurrente vs. puntual y proyectar/optimizar compras futuras. Cualquier gasto de Rubro = Supermercado debería tener también su detalle acá, no solo el total en `Gastos`.
 
 ### Tabla `Tarjetas`
-| Tarjeta/Banco | Día de vencimiento | Monto del resumen |
+| Tarjeta/Banco | Día de vencimiento | Monto del resumen | Monto del resumen (USD) |
 
 Solo para recordatorio de cuándo vence cada resumen de tarjeta y cuánto es, aproximado. **No se suma al total de gastos** — las compras hechas con esas tarjetas ya están contadas una por una en `Gastos`; sumar el resumen acá también duplicaría el total.
 
@@ -83,7 +83,7 @@ Se ve tanto desde la web de Airtable como desde su app mobile.
 - **Gastos del mes**: navegación mes a mes (no todo mezclado), con ingresos/gastos/saldo del mes, gasto real por rubro comparado contra lo presupuestado (Fijos y Variables, con barra de avance y aviso si se pasó), y el listado de movimientos reales de `Gastos` de ese mes.
 - **Presupuesto**: gestión de la tabla `Presupuesto` — ver los rubros de Ingresos/Fijos/Variables agrupados con su monto esperado, editarlo inline, borrar un rubro, o agregar uno nuevo (ej. "Monotributo" como gasto fijo).
 - **Consumo**: análisis histórico de `Items Supermercado` — gasto por categoría, y productos separados en recurrentes (aparecen en 2+ compras, con precio promedio) vs. puntuales, para anticipar la próxima compra y detectar qué conviene comprar por mayor.
-- **Vencimientos**: gastos fijos y tarjetas ordenados por proximidad ("vence en 3 días"), con el día editable ahí mismo. Permite agregar/editar/borrar tarjetas.
+- **Vencimientos**: gastos fijos y tarjetas ordenados por proximidad ("vence en 3 días"), con el día editable ahí mismo. Las tarjetas además permiten cargar y editar el monto del resumen en pesos y en dólares por separado (muchas tarjetas argentinas separan consumos en ARS de los en USD). Permite agregar/editar/borrar tarjetas.
 - **Gráficos**: tres gráficos —
   1. Evolución mensual (últimos 6 meses): por mes, una barra apilada de gasto (Fijo + Variable) y al lado una barra de Ingresos, para comparar de un vistazo.
   2. "Distribución del gasto por rubro" (del mes que se esté mirando en Gastos del mes): donut con el detalle de los principales rubros al lado (nombre, monto, % del total) — incluye TODOS los rubros con gasto ese mes, tengan presupuesto cargado o no.
