@@ -357,6 +357,9 @@
   .chart-legend .val{
     font-family:'IBM Plex Mono', monospace; color:var(--ink); font-variant-numeric:tabular-nums;
   }
+  .chart-note{margin:10px 0 0; font-size:11.5px; color:var(--ink-faint);}
+  .chart-refline{stroke:var(--ink-faint); stroke-width:1; stroke-dasharray:3,3;}
+  .chart-bar-track{fill:var(--paper-sunken);}
 
   footer.note{
     margin-top:22px; padding-top:16px; border-top:1px solid var(--line);
@@ -627,9 +630,9 @@
         </ul>
       </div>
       <div class="chart-card">
-        <h2 id="chartRubroTitle">Gasto por rubro</h2>
-        <svg id="chartRubro" viewBox="0 0 640 260" role="img" aria-label="Distribución del gasto por rubro"></svg>
-        <ul class="chart-legend" id="chartRubroLegend"></ul>
+        <h2 id="chartRubroTitle">Cumplimiento de presupuesto</h2>
+        <svg id="chartRubro" viewBox="0 0 640 260" role="img" aria-label="Porcentaje de presupuesto usado por rubro"></svg>
+        <p class="chart-note" id="chartRubroNote"></p>
       </div>
     </section>
 
@@ -1400,58 +1403,85 @@
 
   function renderRubroChart(){
     var svg = document.getElementById("chartRubro");
-    var legend = document.getElementById("chartRubroLegend");
+    var note = document.getElementById("chartRubroNote");
     var title = document.getElementById("chartRubroTitle");
     svg.innerHTML = "";
-    legend.innerHTML = "";
-    title.textContent = "Gasto por rubro — " + MESES_LARGO[viewMonth] + " " + viewYear;
+    title.textContent = "Cumplimiento de presupuesto — " + MESES_LARGO[viewMonth] + " " + viewYear;
 
-    var byRubro = {};
+    var realByRubro = {};
     Object.keys(gastosById).forEach(function(id){
       var g = gastosById[id];
       if (!inViewMonth(g.fecha)) return;
-      byRubro[g.rubro || "Sin rubro"] = (byRubro[g.rubro || "Sin rubro"] || 0) + g.monto;
+      var r = g.rubro || "Sin rubro";
+      realByRubro[r] = (realByRubro[r] || 0) + g.monto;
     });
-    var rubros = Object.keys(byRubro).sort(function(a,b){ return byRubro[b] - byRubro[a]; });
-    var total = rubros.reduce(function(s,r){ return s + byRubro[r]; }, 0);
+    var presuByRubro = {};
+    Object.keys(presupuestoById).forEach(function(id){
+      var p = presupuestoById[id];
+      if (p.grupo !== "Fijo" && p.grupo !== "Variable") return;
+      presuByRubro[p.rubro] = (presuByRubro[p.rubro] || 0) + (p.monto || 0);
+    });
 
-    if (rubros.length === 0 || total === 0){
-      var msg = svgEl("text", {x:320, y:130, "text-anchor":"middle", class:"chart-axis"});
-      msg.textContent = "Sin gastos este mes";
+    var withBudget = Object.keys(presuByRubro).filter(function(r){ return presuByRubro[r] > 0; })
+      .map(function(r){
+        var real = realByRubro[r] || 0;
+        return {rubro: r, real: real, presu: presuByRubro[r], pct: real / presuByRubro[r] * 100};
+      })
+      .sort(function(a,b){ return b.pct - a.pct; });
+
+    var withoutBudget = Object.keys(realByRubro).filter(function(r){ return !presuByRubro[r]; });
+
+    if (withBudget.length === 0){
+      var msg = svgEl("text", {x:320, y:40, "text-anchor":"middle", class:"chart-axis"});
+      msg.textContent = "Cargá presupuesto por rubro para ver esto";
+      svg.setAttribute("viewBox", "0 0 640 80");
       svg.appendChild(msg);
+      note.textContent = "";
       return;
     }
 
-    var cx = 130, cy = 130, rOuter = 100, rInner = 58;
-    var angleStart = -Math.PI/2;
-    rubros.forEach(function(r, i){
-      var frac = byRubro[r] / total;
-      var angleEnd = angleStart + frac * Math.PI * 2;
-      var color = CHART_PALETTE[i % CHART_PALETTE.length];
-      var x1 = cx + rOuter * Math.cos(angleStart), y1 = cy + rOuter * Math.sin(angleStart);
-      var x2 = cx + rOuter * Math.cos(angleEnd), y2 = cy + rOuter * Math.sin(angleEnd);
-      var xi1 = cx + rInner * Math.cos(angleEnd), yi1 = cy + rInner * Math.sin(angleEnd);
-      var xi2 = cx + rInner * Math.cos(angleStart), yi2 = cy + rInner * Math.sin(angleStart);
-      var largeArc = (angleEnd - angleStart) > Math.PI ? 1 : 0;
-      var d = "M" + x1 + "," + y1 +
-        " A" + rOuter + "," + rOuter + " 0 " + largeArc + " 1 " + x2 + "," + y2 +
-        " L" + xi1 + "," + yi1 +
-        " A" + rInner + "," + rInner + " 0 " + largeArc + " 0 " + xi2 + "," + yi2 + " Z";
-      svg.appendChild(svgEl("path", {d: d, fill: color}));
-      angleStart = angleEnd;
+    var rowH = 34, padTop = 8, padBottom = 26, labelW = 168, padRight = 60;
+    var H = padTop + withBudget.length * rowH + padBottom;
+    var W = 640;
+    var trackW = W - labelW - padRight;
+    var maxPct = Math.max(100, Math.ceil(Math.max.apply(null, withBudget.map(function(d){return d.pct;})) / 25) * 25 + 15);
+    svg.setAttribute("viewBox", "0 0 " + W + " " + H);
 
-      var li = document.createElement("li");
-      li.innerHTML = '<span class="swatch" style="background:' + color + ';"></span>' +
-        escapeHtml(r) + ' <span class="val">$' + formatARS(byRubro[r]) + '</span>';
-      legend.appendChild(li);
+    function xFor(pct){ return labelW + Math.min(pct, maxPct) / maxPct * trackW; }
+
+    withBudget.forEach(function(d, i){
+      var y = padTop + i * rowH;
+      var barY = y + 7, barH = 14;
+      var over = d.pct > 100;
+
+      svg.appendChild(svgEl("rect", {x: labelW, y: barY, width: trackW, height: barH, class:"chart-bar-track", rx:3}));
+      var barW = Math.max(0, xFor(d.pct) - labelW);
+      svg.appendChild(svgEl("rect", {
+        x: labelW, y: barY, width: barW, height: barH, rx: 3,
+        fill: over ? "var(--danger)" : "var(--fijo)"
+      }));
+
+      var name = svgEl("text", {x: labelW - 10, y: barY + barH - 3, "text-anchor":"end", class:"chart-axis"});
+      name.textContent = d.rubro.length > 20 ? d.rubro.slice(0,19) + "…" : d.rubro;
+      svg.appendChild(name);
+
+      var pctLbl = svgEl("text", {
+        x: xFor(d.pct) + 6, y: barY + barH - 3, class:"chart-value",
+        style: over ? "fill:var(--danger)" : "fill:var(--ink)"
+      });
+      pctLbl.textContent = d.pct.toFixed(0) + "%";
+      svg.appendChild(pctLbl);
     });
 
-    var totalLbl = svgEl("text", {x: cx, y: cy - 4, "text-anchor":"middle", class:"chart-value", style:"font-size:13px;"});
-    totalLbl.textContent = "$" + formatARS(total);
-    svg.appendChild(totalLbl);
-    var totalSub = svgEl("text", {x: cx, y: cy + 12, "text-anchor":"middle", class:"chart-axis"});
-    totalSub.textContent = "total";
-    svg.appendChild(totalSub);
+    var refX = xFor(100);
+    svg.appendChild(svgEl("line", {x1: refX, y1: padTop - 2, x2: refX, y2: H - padBottom + 2, class:"chart-refline"}));
+    var refLbl = svgEl("text", {x: refX, y: H - padBottom + 16, "text-anchor":"middle", class:"chart-axis"});
+    refLbl.textContent = "100%";
+    svg.appendChild(refLbl);
+
+    note.textContent = withoutBudget.length
+      ? "Sin presupuesto cargado (no se grafican): " + withoutBudget.map(function(r){ return r + " ($" + formatARS(realByRubro[r]) + ")"; }).join(", ")
+      : "";
   }
 
   function renderGraficos(){
