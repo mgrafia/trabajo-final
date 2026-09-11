@@ -12,7 +12,7 @@
 
 > Nuevo ingreso a cargar en Ingresos:
 >
-> 01/09/2026 | 1615799,03 | (Fuente sin especificar) | Transferencia de [nombre del remitente omitido] - "Varios" (Op. [numero omitido])
+> 01/09/2026 | 1615799,03 | (Fuente sin especificar) | Transferencia de [nombre del remitente omitido] - "Varios" (Op. [número omitido])
 >
 > El concepto dice "Varios", así que no puedo asumir la fuente — ¿es Freelance, Otros, o cuál de la lista?
 
@@ -27,7 +27,7 @@
 >
 > Cargado ✅
 >
-> Ingresos — 01/09/2026 | $1.615.799,03 | Freelance | Transferencia de [nombre del remitente omitido] - abono mensual asesoría comercial (Op. [numero omitido])
+> Ingresos — 01/09/2026 | $1.615.799,03 | Freelance | Transferencia de [nombre del remitente omitido] - abono mensual asesoría comercial (Op. [número omitido])
 >
 > Avisame cuando tengas el número de factura y lo agrego a la descripción.
 
